@@ -2,6 +2,13 @@
 
 A file that smooths over some of the rough edges of QUnit's CLI support.
 
+## Setup
+
+~~~ js
+  // the path to QUnit is set at the top of qunit-clib.js
+  var path = '/path/to/qunit.js';
+~~~
+
 ## Usage
 
 ~~~ js

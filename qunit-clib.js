@@ -6,18 +6,18 @@
  */
 ;(function(global) {
 
+  /** The path to QUnit */
+  var path = '../qunit/qunit/qunit.js';
+
   /** Add `console.log()` support for Narwhal, Rhino and Ringo */
   global.console || (global.console = { 'log': global.print });
 
   /** The unit testing framework */
   global.QUnit =
-    (function() {
-      var path = '../vendor/QUnit/QUnit/QUnit.js';
-      return global.QUnit ||
-        (typeof require == 'function' && (global.QUnit = require(path)) ||
-        typeof load == 'function' && (load(path), QUnit)) &&
-        (QUnit.QUnit || QUnit);
-    }());
+    global.QUnit ||
+    (typeof require == 'function' && (global.QUnit = require(path)) ||
+    typeof load == 'function' && (load(path), QUnit)) &&
+    (QUnit.QUnit || QUnit);
 
   /*--------------------------------------------------------------------------*/
 
