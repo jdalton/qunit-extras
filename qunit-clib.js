@@ -1,7 +1,7 @@
 /*!
  * QUnit-CLI Helper
  * Copyright 2011 John-David Dalton <http://allyoucanleet.com/>
- * Based on the gist by Jšrn Zaefferer <https://gist.github.com/722381>
+ * Based on the gist by JÃ¶rn Zaefferer <https://gist.github.com/722381>
  * Available under MIT license <http://mths.be/mit>
  */
 ;(function(global) {
@@ -33,12 +33,12 @@
     var index = -1,
         length = array.length;
 
-	while (++index < length) {
-	  if (index in array && callback(array[index], index, array) === false) {
-		break;
-	  }
-	}
-	return array;
+    while (++index < length) {
+      if (index in array && callback(array[index], index, array) === false) {
+        break;
+      }
+    }
+    return array;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -69,7 +69,7 @@
         response = !result && type == 'EQ' ? 'Expected: ' + expected + ', Actual: ' + details.actual : '';
 
     QUnit.config.testStats.assertions
-	  .push([outcome, type, message, response].join(' | '));
+      .push([outcome, type, message, response].join(' | '));
   }
 
   /**
@@ -80,17 +80,17 @@
    * @returns {String} The result string.
    */
   var parseObject = (function() {
-	var _parseObject = QUnit.jsDump.parsers.object;
-	return function(object) {
-	   // fork to support Rhino's error objects
-	  if (typeof object.rhinoException == 'object') {
-		return object.name +
-		  ' { message: "' + object.message +
-		  '", fileName: "' + object.fileName +
-		  '", lineNumber: ' + object.lineNumber + ' }';
-	  }
-	  return _parseObject(object);
-	};
+    var _parseObject = QUnit.jsDump.parsers.object;
+    return function(object) {
+      // fork to support Rhino's error objects
+      if (typeof object.rhinoException == 'object') {
+        return object.name +
+          ' { message: "' + object.message +
+          '", fileName: "' + object.fileName +
+          '", lineNumber: ' + object.lineNumber + ' }';
+      }
+      return _parseObject(object);
+    };
   }());
 
   /**
@@ -102,14 +102,14 @@
     var assertions = QUnit.config.testStats.assertions,
         name = details.name;
 
-	if (details.failed > 0) {
-	  console.log('FAIL - '+ name);
-	  for (var i = 0, length = assertions.length; i < length; i++) {
-		console.log('    ' + assertions[i]);
-	  }
-	} else {
-	  console.log('PASS - ' + name);
-	}
+    if (details.failed > 0) {
+      console.log('FAIL - '+ name);
+      for (var i = 0, length = assertions.length; i < length; i++) {
+        console.log('    ' + assertions[i]);
+      }
+    } else {
+      console.log('PASS - ' + name);
+    }
     assertions.length = 0;
   }
 
@@ -133,9 +133,9 @@
   // add shortcuts to the global
   // exclude `module` because some environments have that function built-in
   each(['asyncTest', 'deepEqual', 'equal', 'equals', 'expect', 'notDeepEqual',
-		'notEqual', 'notStrictEqual', 'ok', 'raises', 'same', 'start', 'stop',
-		'strictEqual', 'test'], function(name) {
-	global[name] = QUnit[name];
+        'notEqual', 'notStrictEqual', 'ok', 'raises', 'same', 'start', 'stop',
+        'strictEqual', 'test'], function(name) {
+    global[name] = QUnit[name];
   });
 
   // don't forget to call `QUnit.start()` from another file
