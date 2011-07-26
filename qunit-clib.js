@@ -1,5 +1,5 @@
 /*!
- * QUnit-CLI Helper
+ * QUnit CLI Boilerplate
  * Copyright 2011 John-David Dalton <http://allyoucanleet.com/>
  * Based on the gist by Jörn Zaefferer <https://gist.github.com/722381>
  * Available under MIT license <http://mths.be/mit>
@@ -121,7 +121,7 @@
   };
 
   // add shortcuts to the global
-  // exclude `module` because some environments have that function built-in
+  // exclude `module` because some environments have it as a built-in object
   each(['asyncTest', 'deepEqual', 'equal', 'equals', 'expect', 'notDeepEqual',
         'notEqual', 'notStrictEqual', 'ok', 'raises', 'same', 'start', 'stop',
         'strictEqual', 'test'], function(name) {
