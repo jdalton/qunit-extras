@@ -6,24 +6,16 @@
  */
 ;(function(global) {
 
-  /** The path to QUnit */
-  var path = '../qunit/qunit/qunit.js';
-
   /** Add `console.log()` support for Narwhal, Rhino and Ringo */
   global.console || (global.console = { 'log': global.print });
 
-  /** The unit testing framework */
-  global.QUnit =
-    global.QUnit ||
-    (typeof require == 'function' && (global.QUnit = require(path)) ||
-    typeof load == 'function' && (load(path), QUnit)) &&
-    (QUnit.QUnit || QUnit);
+  /** Reduce global.QUnit.QUnit -> global.QUnit */
+  global.QUnit && (QUnit = QUnit.QUnit || QUnit);
 
   /*--------------------------------------------------------------------------*/
 
   /**
    * A bare-bones `Array#forEach` solution.
-   * Callbacks may terminate the loop by explicitly returning `false`.
    * @private
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
@@ -34,9 +26,7 @@
         length = array.length;
 
     while (++index < length) {
-      if (index in array && callback(array[index], index, array) === false) {
-        break;
-      }
+      index in array && callback(array[index], index, array);
     }
     return array;
   }
@@ -104,9 +94,9 @@
 
     if (details.failed > 0) {
       console.log('FAIL - '+ name);
-      for (var i = 0, length = assertions.length; i < length; i++) {
-        console.log('    ' + assertions[i]);
-      }
+      each(assertions, function(value) {
+        console.log('    ' + value);
+      });
     } else {
       console.log('PASS - ' + name);
     }

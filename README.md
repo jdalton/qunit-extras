@@ -1,21 +1,34 @@
 # QUnit CLIB *(command-line interface boilerplate)*
 
-A file that smooths over some of the rough edges of QUnit's CLI support.
-
-## Setup
-
-~~~ js
-  // the path to QUnit is set at the top of qunit-clib.js
-  var path = '/path/to/qunit.js';
-~~~
+QUnit CLIB helps extend QUnit's CLI support to many common CLI environments<sup><a name="fnref1" href="#fn1">1</a></sup>.
 
 ## Usage
 
 ~~~ js
-  // loads QUnit CLIB in Narwhal, Node.js, Rhino and Ringo
-  (this.QUnit && function(){} ||
-   typeof require == 'function' && require ||
-   typeof load == 'function' && load)('../path/to/qunit-clib.js');
+(function(window) {
+
+  // use a single load function
+  var load = typeof require == 'function' ? require : window.load;
+
+  // load QUnit and CLIB if needed
+  var QUnit =
+    window.QUnit ||
+    (window.QUnit = load('path/to/qunit.js') || window.QUnit) &&
+    (load('path/to/qunit-clib.js'), window.QUnit);
+
+  // must explicitly use `QUnit.module` instead of `module()`
+  // in case we are in a CLI environment
+  QUnit.module('A Test Module');
+
+  test('A Test', function() {
+    // ...
+  });
+
+  // explicitly call `QUnit.start()` in a CLI environment
+  if (!window.document) {
+    QUnit.start();
+  }
+}(typeof global == 'object' && global || this));
 ~~~
 
 ## Cloning this repo
@@ -28,6 +41,11 @@ cd qunit-clib
 ~~~
 
 Feel free to fork if you see possible improvements!
+
+## Footnotes
+
+  1. QUnit CLIB has been tested in at least Node.js 0.4.2, Narwhal 0.3.2, Ringo 0.7, and Rhino 1.7RC3.
+     <a name="fn1" title="Jump back to footnote 1 in the text." href="#fnref1">&#8617;</a>
 
 ## Authors
 
