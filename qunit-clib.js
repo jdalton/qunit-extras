@@ -39,10 +39,14 @@
    * @param {Object} details An object with properties `failed`, `passed`, 'runtime', and `total`.
    */
   function done(details) {
-    console.log('----------------------------------------');
-    console.log(' PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);
-    console.log(' Finished in ' + details.runtime + ' milliseconds.');
-    console.log('----------------------------------------');
+    // avoid a bug w/ `asyncTest()` and environments w/o timeouts calling `done()` twice
+    if (!QUnit.doneCalled) {
+      QUnit.doneCalled = true;
+      console.log('----------------------------------------');
+      console.log('    PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);
+      console.log('    Finished in ' + details.runtime + ' milliseconds.');
+      console.log('----------------------------------------');
+    }
   }
 
   /**
@@ -60,6 +64,17 @@
 
     QUnit.config.testStats.assertions
       .push([outcome, type, message, response].join(' | '));
+  }
+
+  /**
+   * A logging callback triggered at the start of every test module.
+   * @memberOf QUnit
+   * @param {Object} details An object with property `name`.
+   */
+  function moduleStart(details) {
+    console.log('----------------------------------------');
+    console.log(details.name);
+    console.log('----------------------------------------');
   }
 
   /**
@@ -93,12 +108,12 @@
         name = details.name;
 
     if (details.failed > 0) {
-      console.log('FAIL - '+ name);
+      console.log(' FAIL - '+ name);
       each(assertions, function(value) {
         console.log('    ' + value);
       });
     } else {
-      console.log('PASS - ' + name);
+      console.log(' PASS - ' + name);
     }
     assertions.length = 0;
   }
@@ -131,6 +146,7 @@
   // don't forget to call `QUnit.start()` from another file
   QUnit.done = done;
   QUnit.log = log;
+  QUnit.moduleStart = moduleStart;
   QUnit.testDone = testDone;
   QUnit.jsDump.parsers.object = parseObject;
   QUnit.init();
