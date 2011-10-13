@@ -6,11 +6,20 @@
  */
 ;(function(global) {
 
-  /** Add `console.log()` support for Narwhal, Rhino and Ringo */
+  /** Add `console.log()` support for Narwhal, Rhino, and Ringo */
   global.console || (global.console = { 'log': global.print });
 
   /** Reduce global.QUnit.QUnit -> global.QUnit */
   global.QUnit && (QUnit = QUnit.QUnit || QUnit);
+
+  /** Used as a horizontal rule in console output */
+  var hr = '----------------------------------------',
+
+  /** Shortcut used to convert array-like objects to arrays */
+  slice = [].slice,
+
+  /** Used to resolve a value's internal [[Class]] */
+  toString = {}.toString;
 
   /*--------------------------------------------------------------------------*/
 
@@ -42,10 +51,10 @@
     // avoid a bug w/ `asyncTest()` and environments w/o timeouts calling `done()` twice
     if (!QUnit.doneCalled) {
       QUnit.doneCalled = true;
-      console.log('----------------------------------------');
+      console.log(hr);
       console.log('    PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);
       console.log('    Finished in ' + details.runtime + ' milliseconds.');
-      console.log('----------------------------------------');
+      console.log(hr);
     }
   }
 
@@ -72,9 +81,9 @@
    * @param {Object} details An object with property `name`.
    */
   function moduleStart(details) {
-    console.log('----------------------------------------');
+    console.log(hr);
     console.log(details.name);
-    console.log('----------------------------------------');
+    console.log(hr);
   }
 
   /**
@@ -117,6 +126,98 @@
     }
     assertions.length = 0;
   }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
+   * @see https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
+   * @see http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
+   */
+  (function() {
+    var timer,
+        counter = 0,
+        ids = {};
+
+    /**
+     * Schedules timer-based callbacks.
+     * @private
+     * @param {Function} fn The function to call.
+     * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
+     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+     * @param {Boolean} repeated A flag to specify whether `fn` is called repeatedly.
+     * @returns {Number} The the ID of the timeout.
+     */
+    function schedule(fn, delay, args, repeated) {
+      var task = ids[++counter] = new JavaAdapter(java.util.TimerTask, {
+        'run': function() {
+          fn.apply(global, args);
+        }
+      });
+      // support non-functions
+      if (toString.call(fn) != '[object Function]') {
+        fn = (function(code) {
+          code = String(code);
+          return function() { eval(code); };
+        }(fn));
+      }
+      // used by setInterval
+      if (repeated) {
+        timer.schedule(task, delay, delay);
+      }
+      // used by setTimeout
+      else {
+        timer.schedule(task, delay);
+      }
+      return counter;
+    }
+
+    /**
+     * Clears the delay set by `setInterval` or `setTimeout`.
+     * @memberOf global
+     * @param {Number} id The ID of the timeout to be cleared.
+     */
+    function clearTimer(id) {
+      if (ids[id]) {
+        ids[id].cancel();
+        timer.purge();
+        delete ids[id];
+      }
+    }
+
+    /**
+     * Executes a code snippet or function repeatedly, with a delay between each call.
+     * @memberOf global
+     * @param {Function|String} fn The function to call or string to evaluate.
+     * @oaram {Number} delay The number of milliseconds to delay each `fn` call.
+     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+     * @returns {Number} The the ID of the timeout.
+     */
+    function setInterval(fn, delay) {
+      return schedule(fn, delay, slice.call(arguments, 2), true);
+    }
+
+    /**
+     * Executes a code snippet or a function after specified delay.
+     * @memberOf global
+     * @param {Function|String} fn The function to call or string to evaluate.
+     * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
+     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+     * @returns {Number} The the ID of the timeout.
+     */
+    function setTimeout(fn, delay) {
+      return schedule(fn, delay, slice.call(arguments, 2));
+    }
+
+    // expose methods
+    try {
+      timer = new java.util.Timer;
+      global.clearInterval || (global.clearInterval = clearTimer);
+      global.clearTimeout || (global.clearTimeout = clearTimer);
+      global.setInterval || (global.setInterval = setInterval);
+      global.setTimeout || (global.setTimeout = setTimeout);
+    } catch(e) {}
+  }());
 
   /*--------------------------------------------------------------------------*/
 
