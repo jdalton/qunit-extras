@@ -65,7 +65,7 @@
    */
   function log(details) {
     var expected = details.expected,
-        message = details.message || '',
+        message = details.message || 'ok',
         result = details.result,
         outcome = result ? 'PASS' : 'FAIL',
         type = typeof expected != 'undefined' ? 'EQ' : 'OK',
