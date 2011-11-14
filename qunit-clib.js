@@ -12,6 +12,8 @@
   /** Reduce global.QUnit.QUnit -> global.QUnit */
   global.QUnit && (QUnit = QUnit.QUnit || QUnit);
 
+  /*--------------------------------------------------------------------------*/
+
   /** Used as a horizontal rule in console output */
   var hr = '----------------------------------------',
 
@@ -65,14 +67,18 @@
    */
   function log(details) {
     var expected = details.expected,
-        message = details.message || 'ok',
         result = details.result,
-        outcome = result ? 'PASS' : 'FAIL',
         type = typeof expected != 'undefined' ? 'EQ' : 'OK',
-        response = !result && type == 'EQ' ? 'Expected: ' + expected + ', Actual: ' + details.actual : '';
+        assertion = [
+          result ? 'PASS' : 'FAIL',
+          type,
+          details.message || 'ok'
+        ];
 
-    QUnit.config.testStats.assertions
-      .push([outcome, type, message, response].join(' | '));
+    if (!result && type == 'EQ') {
+      assertion.push('Expected: ' + expected + ', Actual: ' + details.actual);
+    }
+    QUnit.config.testStats.assertions.push(assertion.join(' | '));
   }
 
   /**
