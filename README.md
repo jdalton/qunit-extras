@@ -12,9 +12,13 @@ QUnit CLIB helps extend QUnit's CLI support to many common CLI environments<sup>
 
   // load QUnit and CLIB if needed
   var QUnit =
-    window.QUnit ||
-    (window.QUnit = load('path/to/qunit.js') || window.QUnit) &&
-    (load('path/to/qunit-clib.js'), window.QUnit);
+    window.QUnit || (
+      window.setTimeout || (window.addEventListener = window.setTimeout = / /),
+      window.QUnit = load('path/to/qunit.js') || window.QUnit,
+      load('path/to/qunit-clib.js'),
+      window.addEventListener.test && delete window.addEventListener,
+      window.QUnit
+    );
 
   // must explicitly use `QUnit.module` instead of `module()`
   // in case we are in a CLI environment
