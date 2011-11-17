@@ -42,6 +42,16 @@
     return array;
   }
 
+  /**
+   * Checks if the specified `value` is a function.
+   * @private
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} Returns `true` if `value` is a function, else `false`.
+   */
+  function isFunction(value) {
+    return toString.call(value) == '[object Function]';
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -57,6 +67,11 @@
       console.log('    PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);
       console.log('    Finished in ' + details.runtime + ' milliseconds.');
       console.log(hr);
+
+      // exit out of Rhino
+      if (typeof quit == 'function') {
+        quit();
+      }
     }
   }
 
@@ -161,7 +176,7 @@
         }
       });
       // support non-functions
-      if (toString.call(fn) != '[object Function]') {
+      if (!isFunction(fn)) {
         fn = (function(code) {
           code = String(code);
           return function() { eval(code); };
@@ -218,10 +233,10 @@
     // expose methods
     try {
       timer = new java.util.Timer;
-      global.clearInterval || (global.clearInterval = clearTimer);
-      global.clearTimeout || (global.clearTimeout = clearTimer);
-      global.setInterval || (global.setInterval = setInterval);
-      global.setTimeout || (global.setTimeout = setTimeout);
+      isFunction(global.clearInterval) || (global.clearInterval = clearTimer);
+      isFunction(global.clearTimeout) || (global.clearTimeout = clearTimer);
+      isFunction(global.setInterval) || (global.setInterval = setInterval);
+      isFunction(global.setTimeout) || (global.setTimeout = setTimeout);
     } catch(e) {}
   }());
 
