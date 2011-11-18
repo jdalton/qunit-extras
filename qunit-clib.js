@@ -6,7 +6,7 @@
  */
 ;(function(global) {
 
-  /** Add `console.log()` support for Narwhal, Rhino, and Ringo */
+  /** Add `console.log()` support for Narwhal, Rhino, and RingoJS */
   global.console || (global.console = { 'log': global.print });
 
   /** Reduce global.QUnit.QUnit -> global.QUnit */
@@ -26,7 +26,7 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * A bare-bones `Array#forEach` solution.
+   * An iteration utility for arrays.
    * @private
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
@@ -37,7 +37,7 @@
         length = array.length;
 
     while (++index < length) {
-      index in array && callback(array[index], index, array);
+      callback(array[index], index, array);
     }
     return array;
   }
@@ -60,7 +60,7 @@
    * @param {Object} details An object with properties `failed`, `passed`, 'runtime', and `total`.
    */
   function done(details) {
-    // avoid a bug w/ `asyncTest()` and environments w/o timeouts calling `done()` twice
+    // stop `asyncTest()` from erroneously calling `done()` twice in environments w/o timeouts
     if (!QUnit.doneCalled) {
       console.log(hr);
       console.log('    PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);

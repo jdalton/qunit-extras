@@ -48,7 +48,7 @@ Feel free to fork if you see possible improvements!
 
 ## Footnotes
 
-  1. QUnit CLIB has been tested in at least Node.js 0.4.2, Narwhal 0.3.2, Ringo 0.7, and Rhino 1.7RC3.
+  1. QUnit CLIB has been tested in at least Node.js 0.4.8-0.6.1, Narwhal 0.3.2, RingoJS 0.7-0.8, and Rhino 1.7RC3.
      <a name="fn1" title="Jump back to footnote 1 in the text." href="#fnref1">&#8617;</a>
 
 ## Authors
