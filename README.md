@@ -16,7 +16,7 @@ QUnit CLIB helps extend QUnit's CLI support to many common CLI environments<sup>
       window.setTimeout || (window.addEventListener = window.setTimeout = / /),
       window.QUnit = load('path/to/qunit.js') || window.QUnit,
       load('path/to/qunit-clib.js'),
-      window.addEventListener.test && delete window.addEventListener,
+      (window.addEventListener || 0).test && delete window.addEventListener,
       window.QUnit
     );
 
