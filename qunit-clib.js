@@ -62,16 +62,17 @@
   function done(details) {
     // avoid a bug w/ `asyncTest()` and environments w/o timeouts calling `done()` twice
     if (!QUnit.doneCalled) {
-      QUnit.doneCalled = true;
       console.log(hr);
       console.log('    PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);
       console.log('    Finished in ' + details.runtime + ' milliseconds.');
       console.log(hr);
 
       // exit out of Rhino
-      if (typeof quit == 'function') {
-        quit();
-      }
+      try { quit(); } catch(e) { }
+      // exit out of Node.js
+      try { process.exit(); } catch(e) { }
+      // prevent multiple calls to `done()`
+      QUnit.doneCalled = true;
     }
   }
 
