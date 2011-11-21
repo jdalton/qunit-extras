@@ -30,7 +30,6 @@
    * @private
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
-   * @returns {Array} Returns the array iterated over.
    */
   function each(array, callback) {
     var index = -1,
@@ -39,7 +38,6 @@
     while (++index < length) {
       callback(array[index], index, array);
     }
-    return array;
   }
 
   /**
