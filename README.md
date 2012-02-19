@@ -51,7 +51,7 @@ Feel free to fork if you see possible improvements!
   1. QUnit CLIB has been tested in at least Node.js 0.4.8-0.6.1, Narwhal 0.3.2, RingoJS 0.7-0.8, and Rhino 1.7RC3.
      <a name="fn1" title="Jump back to footnote 1 in the text." href="#fnref1">&#8617;</a>
 
-## Authors
+## Author
 
 * [John-David Dalton](http://allyoucanleet.com/)
   [![twitter/jdalton](http://gravatar.com/avatar/299a3d891ff1920b69c364d061007043?s=70)](https://twitter.com/jdalton "Follow @jdalton on Twitter")
