@@ -1,7 +1,7 @@
 /*!
  * QUnit CLI Boilerplate
- * Copyright 2011 John-David Dalton <http://allyoucanleet.com/>
- * Based on the gist by Jörn Zaefferer <https://gist.github.com/722381>
+ * Copyright 2011-2012 John-David Dalton <http://allyoucanleet.com/>
+ * Based on a gist by Jörn Zaefferer <https://gist.github.com/722381>
  * Available under MIT license <http://mths.be/mit>
  */
 ;(function(global) {
