@@ -15,13 +15,13 @@
   /*--------------------------------------------------------------------------*/
 
   /** Used as a horizontal rule in console output */
-  var hr = '----------------------------------------',
+  var hr = '----------------------------------------';
 
   /** Shortcut used to convert array-like objects to arrays */
-  slice = [].slice,
+  var slice = [].slice;
 
   /** Used to resolve a value's internal [[Class]] */
-  toString = {}.toString;
+  var toString = {}.toString;
 
   /*--------------------------------------------------------------------------*/
 
