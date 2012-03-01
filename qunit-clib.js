@@ -1,5 +1,5 @@
 /*!
- * QUnit CLI Boilerplate
+ * QUnit CLI Boilerplate v1.0.0-pre
  * Copyright 2011-2012 John-David Dalton <http://allyoucanleet.com/>
  * Based on a gist by Jörn Zaefferer <https://gist.github.com/722381>
  * Available under MIT license <http://mths.be/mit>
