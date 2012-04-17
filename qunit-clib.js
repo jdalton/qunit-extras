@@ -27,6 +27,7 @@
 
   /**
    * An iteration utility for arrays.
+   *
    * @private
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
@@ -42,6 +43,7 @@
 
   /**
    * Checks if the specified `value` is a function.
+   *
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if `value` is a function, else `false`.
@@ -54,6 +56,7 @@
 
   /**
    * A logging callback triggered when all testing is completed.
+   *
    * @memberOf QUnit
    * @param {Object} details An object with properties `failed`, `passed`, 'runtime', and `total`.
    */
@@ -76,6 +79,7 @@
 
   /**
    * A logging callback triggered after every assertion.
+   *
    * @memberOf QUnit
    * @param {Object} details An object with properties `actual`, `expected`, `message`, and `result`.
    */
@@ -97,6 +101,7 @@
 
   /**
    * A logging callback triggered at the start of every test module.
+   *
    * @memberOf QUnit
    * @param {Object} details An object with property `name`.
    */
@@ -108,6 +113,7 @@
 
   /**
    * Converts an object into a string representation.
+   *
    * @memberOf QUnit
    * @type Function
    * @param {Object} object The object to stringify.
@@ -129,6 +135,7 @@
 
   /**
    * A logging callback triggered after a test is completed.
+   *
    * @memberOf QUnit
    * @param {Object} details An object with properties `failed`, `name`, `passed`, and `total`.
    */
@@ -151,8 +158,8 @@
 
   /**
    * Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
-   * @see https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
-   * @see http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
+   * https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
+   * http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
    */
   (function() {
     var timer,
@@ -161,6 +168,7 @@
 
     /**
      * Schedules timer-based callbacks.
+     *
      * @private
      * @param {Function} fn The function to call.
      * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
@@ -194,6 +202,7 @@
 
     /**
      * Clears the delay set by `setInterval` or `setTimeout`.
+     *
      * @memberOf global
      * @param {Number} id The ID of the timeout to be cleared.
      */
@@ -207,6 +216,7 @@
 
     /**
      * Executes a code snippet or function repeatedly, with a delay between each call.
+     *
      * @memberOf global
      * @param {Function|String} fn The function to call or string to evaluate.
      * @oaram {Number} delay The number of milliseconds to delay each `fn` call.
@@ -219,6 +229,7 @@
 
     /**
      * Executes a code snippet or a function after specified delay.
+     *
      * @memberOf global
      * @param {Function|String} fn The function to call or string to evaluate.
      * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
@@ -243,6 +254,7 @@
 
   /**
    * An object used to hold information about the current running test.
+   *
    * @memberOf QUnit.config
    * @type Object
    */
@@ -250,6 +262,7 @@
 
     /**
      * An array of test summaries (pipe separated).
+     *
      * @memberOf QUnit.config.testStats
      * @type Array
      */
