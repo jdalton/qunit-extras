@@ -45,7 +45,7 @@ git clone https://github.com/jdalton/qunit-clib.git
 cd qunit-clib
 ~~~
 
-Feel free to fork if you see possible improvements!
+Feel free to fork and send pull requests if you see improvements!
 
 ## Footnotes
 
