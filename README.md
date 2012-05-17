@@ -3,6 +3,10 @@
 
 QUnit CLIB helps extend QUnit's CLI support to many common CLI environments<sup><a name="fnref1" href="#fn1">1</a></sup>.
 
+## Screenshot
+
+![QUnit CLIB brengs QUnit to your favorite shell.](http://i.imgur.com/jpu9l.png)
+
 ## Usage
 
 ~~~ js
