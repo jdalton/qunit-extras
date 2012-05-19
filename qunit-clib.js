@@ -23,6 +23,11 @@
   /** Used to resolve a value's internal [[Class]] */
   var toString = {}.toString;
 
+  /** Used by timer methods */
+  var timer,
+      counter = 0,
+      ids = {};
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -55,10 +60,93 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
+   * https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
+   * http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
+   */
+
+  /**
+   * Clears the delay set by `setInterval` or `setTimeout`.
+   *
+   * @memberOf global
+   * @param {Number} id The ID of the timeout to be cleared.
+   */
+  function clearTimer(id) {
+    if (ids[id]) {
+      ids[id].cancel();
+      timer.purge();
+      delete ids[id];
+    }
+  }
+
+  /**
+   * Schedules timer-based callbacks.
+   *
+   * @private
+   * @param {Function} fn The function to call.
+   * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
+   * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+   * @param {Boolean} repeated A flag to specify whether `fn` is called repeatedly.
+   * @returns {Number} The the ID of the timeout.
+   */
+  function schedule(fn, delay, args, repeated) {
+    var task = ids[++counter] = new JavaAdapter(java.util.TimerTask, {
+      'run': function() {
+        fn.apply(global, args);
+      }
+    });
+    // support non-functions
+    if (!isFunction(fn)) {
+      fn = (function(code) {
+        code = String(code);
+        return function() { eval(code); };
+      }(fn));
+    }
+    // used by setInterval
+    if (repeated) {
+      timer.schedule(task, delay, delay);
+    }
+    // used by setTimeout
+    else {
+      timer.schedule(task, delay);
+    }
+    return counter;
+  }
+
+  /**
+   * Executes a code snippet or function repeatedly, with a delay between each call.
+   *
+   * @memberOf global
+   * @param {Function|String} fn The function to call or string to evaluate.
+   * @oaram {Number} delay The number of milliseconds to delay each `fn` call.
+   * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+   * @returns {Number} The the ID of the timeout.
+   */
+  function setInterval(fn, delay) {
+    return schedule(fn, delay, slice.call(arguments, 2), true);
+  }
+
+  /**
+   * Executes a code snippet or a function after specified delay.
+   *
+   * @memberOf global
+   * @param {Function|String} fn The function to call or string to evaluate.
+   * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
+   * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+   * @returns {Number} The the ID of the timeout.
+   */
+  function setTimeout(fn, delay) {
+    return schedule(fn, delay, slice.call(arguments, 2));
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
    * A logging callback triggered when all testing is completed.
    *
    * @memberOf QUnit
-   * @param {Object} details An object with properties `failed`, `passed`, 'runtime', and `total`.
+   * @param {Object} details An object with properties `failed`, `passed`,
+   *  `runtime`, and `total`.
    */
   function done(details) {
     // stop `asyncTest()` from erroneously calling `done()` twice in environments w/o timeouts
@@ -69,9 +157,15 @@
       console.log(hr);
 
       // exit out of Rhino
-      try { quit(); } catch(e) { }
+      try {
+        quit();
+      } catch(e) { }
+
       // exit out of Node.js
-      try { process.exit(); } catch(e) { }
+      try {
+        process.exit();
+      } catch(e) { }
+
       // prevent multiple calls to `done()`
       QUnit.doneCalled = true;
     }
@@ -81,7 +175,8 @@
    * A logging callback triggered after every assertion.
    *
    * @memberOf QUnit
-   * @param {Object} details An object with properties `actual`, `expected`, `message`, and `result`.
+   * @param {Object} details An object with properties `actual`, `expected`,
+   *  `message`, and `result`.
    */
   function log(details) {
     var expected = details.expected,
@@ -137,7 +232,8 @@
    * A logging callback triggered after a test is completed.
    *
    * @memberOf QUnit
-   * @param {Object} details An object with properties `failed`, `name`, `passed`, and `total`.
+   * @param {Object} details An object with properties `failed`, `name`,
+   *  `passed`, and `total`.
    */
   function testDone(details) {
     var assertions = QUnit.config.testStats.assertions,
@@ -148,107 +244,12 @@
       each(assertions, function(value) {
         console.log('    ' + value);
       });
-    } else {
+    }
+    else {
       console.log(' PASS - ' + name);
     }
     assertions.length = 0;
   }
-
-  /*--------------------------------------------------------------------------*/
-
-  /**
-   * Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
-   * https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
-   * http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
-   */
-  (function() {
-    var timer,
-        counter = 0,
-        ids = {};
-
-    /**
-     * Schedules timer-based callbacks.
-     *
-     * @private
-     * @param {Function} fn The function to call.
-     * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
-     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
-     * @param {Boolean} repeated A flag to specify whether `fn` is called repeatedly.
-     * @returns {Number} The the ID of the timeout.
-     */
-    function schedule(fn, delay, args, repeated) {
-      var task = ids[++counter] = new JavaAdapter(java.util.TimerTask, {
-        'run': function() {
-          fn.apply(global, args);
-        }
-      });
-      // support non-functions
-      if (!isFunction(fn)) {
-        fn = (function(code) {
-          code = String(code);
-          return function() { eval(code); };
-        }(fn));
-      }
-      // used by setInterval
-      if (repeated) {
-        timer.schedule(task, delay, delay);
-      }
-      // used by setTimeout
-      else {
-        timer.schedule(task, delay);
-      }
-      return counter;
-    }
-
-    /**
-     * Clears the delay set by `setInterval` or `setTimeout`.
-     *
-     * @memberOf global
-     * @param {Number} id The ID of the timeout to be cleared.
-     */
-    function clearTimer(id) {
-      if (ids[id]) {
-        ids[id].cancel();
-        timer.purge();
-        delete ids[id];
-      }
-    }
-
-    /**
-     * Executes a code snippet or function repeatedly, with a delay between each call.
-     *
-     * @memberOf global
-     * @param {Function|String} fn The function to call or string to evaluate.
-     * @oaram {Number} delay The number of milliseconds to delay each `fn` call.
-     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
-     * @returns {Number} The the ID of the timeout.
-     */
-    function setInterval(fn, delay) {
-      return schedule(fn, delay, slice.call(arguments, 2), true);
-    }
-
-    /**
-     * Executes a code snippet or a function after specified delay.
-     *
-     * @memberOf global
-     * @param {Function|String} fn The function to call or string to evaluate.
-     * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
-     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
-     * @returns {Number} The the ID of the timeout.
-     */
-    function setTimeout(fn, delay) {
-      return schedule(fn, delay, slice.call(arguments, 2));
-    }
-
-    // expose methods
-    try {
-      timer = new java.util.Timer;
-      isFunction(global.clearInterval) || (global.clearInterval = clearTimer);
-      isFunction(global.clearTimeout) || (global.clearTimeout = clearTimer);
-      isFunction(global.setInterval) || (global.setInterval = setInterval);
-      isFunction(global.setTimeout) || (global.setTimeout = setTimeout);
-    } catch(e) {}
-  }());
 
   /*--------------------------------------------------------------------------*/
 
@@ -277,12 +278,33 @@
     global[name] = QUnit[name];
   });
 
-  // don't forget to call `QUnit.start()` from another file
-  QUnit.done = done;
-  QUnit.log = log;
-  QUnit.moduleStart = moduleStart;
-  QUnit.testDone = testDone;
+  // expose timer methods to global
+  try {
+    timer = new java.util.Timer;
+    if (!isFunction(global.clearInterval)) {
+      global.clearInterval = clearTimer;
+    }
+    if (!isFunction(global.clearTimeout)) {
+      global.clearTimeout = clearTimer;
+    }
+    if (!isFunction(global.setInterval)) {
+      global.setInterval = setInterval;
+    }
+    if (!isFunction(global.setTimeout)) {
+      global.setTimeout = setTimeout;
+    }
+  } catch(e) { }
+
+  // add callbacks
+  QUnit.done(done);
+  QUnit.log(log);
+  QUnit.moduleStart(moduleStart);
+  QUnit.testDone(testDone);
+
+  // wrap `parseObject`
   QUnit.jsDump.parsers.object = parseObject;
+
+  // don't forget to call `QUnit.start()` from another file
   QUnit.init();
 
 }(typeof global == 'object' && global || this));
