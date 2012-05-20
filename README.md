@@ -25,13 +25,17 @@ QUnit CLIB helps extend QUnit's CLI support to many common CLI environments<sup>
       window.QUnit
     );
 
-  // must explicitly use `QUnit.module` instead of `module()`
+  // explicitly call `QUnit.module()` instead of `module()`
   // in case we are in a CLI environment
   QUnit.module('A Test Module');
 
   test('A Test', function() {
     // ...
   });
+
+  // must call `QUnit.start()` if using QUnit < 1.3.0 with Node.js or any
+  // version of QUnit with Narwhal, Rhino, or RingoJS
+  QUnit.start();
 
 }(typeof global == 'object' && global || this));
 ~~~

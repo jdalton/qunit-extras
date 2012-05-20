@@ -304,7 +304,8 @@
   // wrap `parseObject`
   QUnit.jsDump.parsers.object = parseObject;
 
-  // don't forget to call `QUnit.start()` the test file if using QUnit < 1.3.0
+  // must call `QUnit.start()` in the test file if using QUnit < 1.3.0 with Node.js
+  // or any version of QUnit with Narwhal, Rhino, or RingoJS
   QUnit.init();
 
 }(typeof global == 'object' && global || this));
