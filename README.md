@@ -5,7 +5,7 @@ QUnit CLIB helps extend QUnit's CLI support to many common CLI environments<sup>
 
 ## Screenshot
 
-![QUnit CLIB brengs QUnit to your favorite shell.](http://i.imgur.com/jpu9l.png)
+![QUnit CLIB brings QUnit to your favorite shell.](http://i.imgur.com/jpu9l.png)
 
 ## Usage
 
@@ -33,10 +33,6 @@ QUnit CLIB helps extend QUnit's CLI support to many common CLI environments<sup>
     // ...
   });
 
-  // explicitly call `QUnit.start()` in a CLI environment
-  if (!window.document) {
-    QUnit.start();
-  }
 }(typeof global == 'object' && global || this));
 ~~~
 
