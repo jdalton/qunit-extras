@@ -5,6 +5,7 @@
  * Available under MIT license <http://mths.be/mit>
  */
 ;(function(global) {
+  'use strict';
 
   /** Add `console.log()` support for Narwhal, Rhino, and RingoJS */
   global.console || (global.console = { 'log': global.print });
