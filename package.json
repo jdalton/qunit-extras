@@ -1,0 +1,16 @@
+{
+  "name": "qunit-clib",
+  "version": "0.1.0",
+  "description": "QUnit CLIB helps extend QUnit's CLI support to many common CLI environments.",
+  "main": "qunit-clib.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jdalton/qunit-clib.git"
+  },
+  "keywords": [
+    "qunit",
+    "cli"
+  ],
+  "author": "John-David Dalton",
+  "readmeFilename": "README.md"
+}
