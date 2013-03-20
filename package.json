@@ -1,16 +1,32 @@
 {
   "name": "qunit-clib",
-  "version": "0.1.0",
-  "description": "QUnit CLIB helps extend QUnit's CLI support to many common CLI environments.",
+  "version": "1.3.0",
+  "description": "QUnit CLIB helps extend QUnit’s CLI support to many common CLI environments.",
   "main": "qunit-clib.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jdalton/qunit-clib.git"
-  },
   "keywords": [
     "qunit",
     "cli"
   ],
-  "author": "John-David Dalton",
-  "readmeFilename": "README.md"
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jdalton/qunit-clib/blob/master/LICENSE.txt"
+    }
+  ],
+  "author": {
+    "name": "John-David Dalton",
+    "email": "john.david.dalton@gmail.com",
+    "web": "http://allyoucanleet.com/"
+  },
+  "bugs": {
+    "url": "https://github.com/jdalton/qunit-clib/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jdalton/qunit-clib.git"
+  },
+  "engines": [
+    "node",
+    "rhino"
+  ]
 }
