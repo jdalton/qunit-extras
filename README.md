@@ -9,7 +9,7 @@ QUnit CLIB helps extend QUnit’s CLI support to many common CLI environments.
 
 ## Support
 
-QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.7, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
+QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.13, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
 
 ## Usage
 
@@ -50,7 +50,7 @@ QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.7, Narwhal 0.3.2, Phan
 
 ## Footnotes
 
-  1. QUnit v1.3.0 does not work with Narwhal or Ringo < v0.8.0
+  1. QUnit v1.3.0 and v1.12.0 are not supported by QUnit CLIB
   2. Rhino v1.7RC4 does not support timeout fallbacks `clearTimeout` and `setTimeout`
 
 ## Author
