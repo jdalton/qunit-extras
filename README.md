@@ -14,22 +14,22 @@ QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.13, Narwhal 0.3.2, Pha
 ## Usage
 
 ```js
-;(function(window) {
+;(function(root) {
   'use strict';
 
   // use a single "load" function
-  var load = typeof require == 'function' ? require : window.load;
+  var load = typeof require == 'function' ? require : root.load;
 
   // load QUnit and CLIB if needed
   var QUnit = (function() {
     var noop = Function.prototype;
-    return  window.QUnit || (
-      window.addEventListener || (window.addEventListener = noop),
-      window.setTimeout || (window.setTimeout = noop),
-      window.QUnit = load('../vendor/qunit/qunit/qunit.js') || window.QUnit,
-      (load('../vendor/qunit-clib/qunit-clib.js') || { 'runInContext': noop }).runInContext(window),
-      addEventListener === noop && delete window.addEventListener,
-      window.QUnit
+    return  root.QUnit || (
+      root.addEventListener || (root.addEventListener = noop),
+      root.setTimeout || (root.setTimeout = noop),
+      root.QUnit = load('../vendor/qunit/qunit/qunit.js') || root.QUnit,
+      (load('../vendor/qunit-clib/qunit-clib.js') || { 'runInContext': noop }).runInContext(root),
+      addEventListener === noop && delete root.addEventListener,
+      root.QUnit
     );
   }());
 
@@ -41,8 +41,7 @@ QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.13, Narwhal 0.3.2, Pha
     // ...
   });
 
-  // call `QUnit.start()` for Narwhal, Node.js, PhantomJS, Rhino, and RingoJS
-  if (!window.document || window.phantom) {
+  if (!root.document || root.phantom) {
     QUnit.start();
   }
 }(typeof global == 'object' && global || this));
