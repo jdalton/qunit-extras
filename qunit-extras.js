@@ -128,13 +128,14 @@
     var moduleName,
         modulePrinted;
 
+    /** Object shortcuts */
+    var phantom = context.phantom,
+        document = !phantom && context.document;
+
     /** Used to display the wait throbber */
     var throbberId,
         throbberDelay = 500,
         waitCount = -1;
-
-    /** Add `console.log()` support for Narwhal, Rhino, and RingoJS */
-    var console = context.console || (context.console = { 'log': context.print });
 
     /** Shorten `context.QUnit.QUnit` to `context.QUnit` */
     var QUnit = context.QUnit = context.QUnit.QUnit || context.QUnit;
@@ -293,119 +294,6 @@
     };
 
     /**
-     * A logging callback triggered when all testing is completed.
-     *
-     * @memberOf QUnit
-     * @param {Object} details An object with properties `failed`, `passed`, `runtime`, and `total`.
-     */
-    QUnit.done(function() {
-      var ran;
-      return function(details) {
-        // stop `asyncTest()` from erroneously calling `done()` twice in
-        // environments w/o timeouts
-        if (ran) {
-          return;
-        }
-        ran = true;
-
-        logInline('');
-        console.log(hr);
-        console.log('    PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);
-        console.log('    Finished in ' + details.runtime + ' milliseconds.');
-        console.log(hr);
-
-        // exit out of Node.js or PhantomJS
-        try {
-          var process = context.process || context.phantom;
-          if (details.failed) {
-            process.exit(1);
-          } else {
-            process.exit(0);
-          }
-        } catch(e) { }
-
-        // exit out of Narwhal, Rhino, or RingoJS
-        try {
-          if (details.failed) {
-            java.lang.System.exit(1);
-          } else {
-            quit();
-          }
-        } catch(e) { }
-      };
-    }());
-
-    /**
-     * A logging callback triggered after every assertion.
-     *
-     * @memberOf QUnit
-     * @param {Object} details An object with properties `actual`, `expected`, `message`, and `result`.
-     */
-    QUnit.log(function(details) {
-      var expected = details.expected,
-          result = details.result,
-          type = typeof expected != 'undefined' ? 'EQ' : 'OK';
-
-      var assertion = [
-        result ? 'PASS' : 'FAIL',
-        type,
-        details.message || 'ok'
-      ];
-
-      if (!result && type == 'EQ') {
-        assertion.push('Expected: ' + expected + ', Actual: ' + details.actual);
-      }
-      QUnit.config.testStats.assertions.push(assertion.join(' | '));
-    });
-
-    /**
-     * A logging callback triggered at the start of every test module.
-     *
-     * @memberOf QUnit
-     * @param {Object} details An object with property `name`.
-     */
-    QUnit.moduleStart(function(details) {
-      // reset the `modulePrinted` flag
-      var newModuleName = details.name;
-      if (moduleName != newModuleName) {
-        moduleName = newModuleName;
-        modulePrinted = false;
-      }
-      // initialize the wait throbber
-      if (!throbberId) {
-        throbberId = context.setInterval(logThrobber, throbberDelay);
-        logThrobber();
-      }
-    });
-
-    /**
-     * A logging callback triggered after a test is completed.
-     *
-     * @memberOf QUnit
-     * @param {Object} details An object with properties `failed`, `name`, `passed`, and `total`.
-     */
-    QUnit.testDone(function(details) {
-      var assertions = QUnit.config.testStats.assertions,
-          testName = details.name;
-
-      if (details.failed > 0) {
-        logInline('');
-        if (!modulePrinted) {
-          modulePrinted = true;
-          console.log(hr);
-          console.log(moduleName);
-          console.log(hr);
-        }
-        console.log(' FAIL - '+ testName);
-        assertions.forEach(function(value) {
-          console.log('    ' + value);
-        });
-      }
-      assertions.length = 0;
-    });
-
-
-    /**
      * A callback triggered at the start of every test.
      *
      * @memberOf QUnit
@@ -479,67 +367,186 @@
       };
     });
 
-    /**
-     * Converts an object into a string representation.
-     *
-     * @memberOf QUnit
-     * @type Function
-     * @param {Object} object The object to stringify.
-     * @returns {string} The result string.
-     */
-    QUnit.jsDump.parsers.object = (function() {
-      var func = QUnit.jsDump.parsers.object;
-      return function(object) {
-        // fork to support Rhino's error objects
-        if (typeof object.rhinoException == 'object') {
-          return object.name +
-            ' { message: "' + object.message +
-            '", fileName: "' + object.fileName +
-            '", lineNumber: ' + object.lineNumber + ' }';
-        }
-        return func(object);
-      };
-    }());
-
     /*------------------------------------------------------------------------*/
 
-    // Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
-    // https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
-    // http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
-    try {
-      var counter = 0,
-          ids = {},
-          slice = Array.prototype.slice,
-          timer = new java.util.Timer;
+    // add CLI extras
+    if (!document) {
 
-      (function() {
-        var getDescriptor = Object.getOwnPropertyDescriptor || function() {
-          return { 'writable': true };
+      /** Add `console.log()` support for Narwhal, Rhino, and RingoJS */
+      var console = context.console || (context.console = { 'log': context.print });
+
+      /**
+       * A logging callback triggered when all testing is completed.
+       *
+       * @memberOf QUnit
+       * @param {Object} details An object with properties `failed`, `passed`, `runtime`, and `total`.
+       */
+      QUnit.done(function() {
+        var ran;
+        return function(details) {
+          // stop `asyncTest()` from erroneously calling `done()` twice in
+          // environments w/o timeouts
+          if (ran) {
+            return;
+          }
+          ran = true;
+
+          logInline('');
+          console.log(hr);
+          console.log('    PASS: ' + details.passed + '  FAIL: ' + details.failed + '  TOTAL: ' + details.total);
+          console.log('    Finished in ' + details.runtime + ' milliseconds.');
+          console.log(hr);
+
+          // exit out of Node.js or PhantomJS
+          try {
+            var process = context.process || context.phantom;
+            if (details.failed) {
+              process.exit(1);
+            } else {
+              process.exit(0);
+            }
+          } catch(e) { }
+
+          // exit out of Narwhal, Rhino, or RingoJS
+          try {
+            if (details.failed) {
+              java.lang.System.exit(1);
+            } else {
+              quit();
+            }
+          } catch(e) { }
         };
-
-        var descriptor;
-        if ((!context.clearInterval || ((descriptor = getDescriptor(context, 'clearInterval')) && (descriptor.writable || descriptor.set))) &&
-            (!context.setInterval   || ((descriptor = getDescriptor(context, 'setInterval'))   && (descriptor.writable || descriptor.set)))) {
-          context.clearInterval = clearTimer;
-          context.setInterval = setInterval;
-        }
-        if ((!context.clearTimeout || ((descriptor = getDescriptor(context, 'clearTimeout')) && (descriptor.writable || descriptor.set))) &&
-            (!context.setTimeout   || ((descriptor = getDescriptor(context, 'setTimeout'))   && (descriptor.writable || descriptor.set)))) {
-          context.clearTimeout = clearTimer;
-          context.setTimeout = setTimeout;
-        }
       }());
-    } catch(e) { }
 
-    // expose shortcuts
-    // exclude `module` because some environments have it as a built-in object
-    ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notStrictEqual ' +
-     'ok raises same start stop strictEqual test throws').replace(/\S+/g, function(methodName) {
-      context[methodName] = QUnit[methodName];
-    });
+      /**
+       * A logging callback triggered after every assertion.
+       *
+       * @memberOf QUnit
+       * @param {Object} details An object with properties `actual`, `expected`, `message`, and `result`.
+       */
+      QUnit.log(function(details) {
+        var expected = details.expected,
+            result = details.result,
+            type = typeof expected != 'undefined' ? 'EQ' : 'OK';
 
-    // must call `QUnit.start()` in the test file if not loaded in a browser
-    if (!context.document || context.phantom) {
+        var assertion = [
+          result ? 'PASS' : 'FAIL',
+          type,
+          details.message || 'ok'
+        ];
+
+        if (!result && type == 'EQ') {
+          assertion.push('Expected: ' + expected + ', Actual: ' + details.actual);
+        }
+        QUnit.config.testStats.assertions.push(assertion.join(' | '));
+      });
+
+      /**
+       * A logging callback triggered at the start of every test module.
+       *
+       * @memberOf QUnit
+       * @param {Object} details An object with property `name`.
+       */
+      QUnit.moduleStart(function(details) {
+        // reset the `modulePrinted` flag
+        var newModuleName = details.name;
+        if (moduleName != newModuleName) {
+          moduleName = newModuleName;
+          modulePrinted = false;
+        }
+        // initialize the wait throbber
+        if (!throbberId) {
+          throbberId = context.setInterval(logThrobber, throbberDelay);
+          logThrobber();
+        }
+      });
+
+      /**
+       * A logging callback triggered after a test is completed.
+       *
+       * @memberOf QUnit
+       * @param {Object} details An object with properties `failed`, `name`, `passed`, and `total`.
+       */
+      QUnit.testDone(function(details) {
+        var assertions = QUnit.config.testStats.assertions,
+            testName = details.name;
+
+        if (details.failed > 0) {
+          logInline('');
+          if (!modulePrinted) {
+            modulePrinted = true;
+            console.log(hr);
+            console.log(moduleName);
+            console.log(hr);
+          }
+          console.log(' FAIL - '+ testName);
+          assertions.forEach(function(value) {
+            console.log('    ' + value);
+          });
+        }
+        assertions.length = 0;
+      });
+
+      /**
+       * Converts an object into a string representation.
+       *
+       * @memberOf QUnit
+       * @type Function
+       * @param {Object} object The object to stringify.
+       * @returns {string} The result string.
+       */
+      QUnit.jsDump.parsers.object = (function() {
+        var func = QUnit.jsDump.parsers.object;
+        return function(object) {
+          // fork to support Rhino's error objects
+          if (typeof object.rhinoException == 'object') {
+            return object.name +
+              ' { message: "' + object.message +
+              '", fileName: "' + object.fileName +
+              '", lineNumber: ' + object.lineNumber + ' }';
+          }
+          return func(object);
+        };
+      }());
+
+      /*----------------------------------------------------------------------*/
+
+      // Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
+      // https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
+      // http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
+      try {
+        var counter = 0,
+            ids = {},
+            slice = Array.prototype.slice,
+            timer = new java.util.Timer;
+
+        (function() {
+          var getDescriptor = Object.getOwnPropertyDescriptor || function() {
+            return { 'writable': true };
+          };
+
+          var descriptor;
+          if ((!context.clearInterval || ((descriptor = getDescriptor(context, 'clearInterval')) && (descriptor.writable || descriptor.set))) &&
+              (!context.setInterval   || ((descriptor = getDescriptor(context, 'setInterval'))   && (descriptor.writable || descriptor.set)))) {
+            context.clearInterval = clearTimer;
+            context.setInterval = setInterval;
+          }
+          if ((!context.clearTimeout || ((descriptor = getDescriptor(context, 'clearTimeout')) && (descriptor.writable || descriptor.set))) &&
+              (!context.setTimeout   || ((descriptor = getDescriptor(context, 'setTimeout'))   && (descriptor.writable || descriptor.set)))) {
+            context.clearTimeout = clearTimer;
+            context.setTimeout = setTimeout;
+          }
+        }());
+      } catch(e) { }
+
+      // expose shortcuts
+      // exclude `module` because some environments have it as a built-in object
+      ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notStrictEqual ' +
+       'ok raises same start stop strictEqual test throws').replace(/\S+/g, function(methodName) {
+        context[methodName] = QUnit[methodName];
+      });
+
+      // must call `QUnit.start()` in the test file if not loaded in a browser
       QUnit.config.autostart = false;
       QUnit.init();
     }
