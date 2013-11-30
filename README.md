@@ -1,15 +1,10 @@
-# QUnit CLIB <sup>v1.3.0</sup>
-## command-line interface boilerplate
+# QUnit Extras <sup>v1.0.0</sup>
 
-QUnit CLIB helps extend QUnit’s CLI support to many common CLI environments.
-
-## Screenshot
-
-![QUnit CLIB brings QUnit to your favorite shell.](http://i.imgur.com/jpu9l.png)
+Extends QUnit with extra features and CLI support.
 
 ## Support
 
-QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.13, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
+QUnit Extras has been tested in at least Node.js 0.6.21~0.10.22, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
 
 ## Usage
 
@@ -20,14 +15,14 @@ QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.13, Narwhal 0.3.2, Pha
   // use a single "load" function
   var load = typeof require == 'function' ? require : root.load;
 
-  // load QUnit and CLIB if needed
+  // load QUnit and extras if needed
   var QUnit = (function() {
     var noop = Function.prototype;
     return  root.QUnit || (
       root.addEventListener || (root.addEventListener = noop),
       root.setTimeout || (root.setTimeout = noop),
       root.QUnit = load('../vendor/qunit/qunit/qunit.js') || root.QUnit,
-      (load('../vendor/qunit-clib/qunit-clib.js') || { 'runInContext': noop }).runInContext(root),
+      (load('../vendor/qunit-extras/qunit-extras.js') || { 'runInContext': noop }).runInContext(root),
       addEventListener === noop && delete root.addEventListener,
       root.QUnit
     );
@@ -35,9 +30,9 @@ QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.13, Narwhal 0.3.2, Pha
 
   // explicitly call `QUnit.module()` instead of `module()`
   // in case we are in a CLI environment
-  QUnit.module('A Test Module');
+  QUnit.module('some test module');
 
-  test('A Test', function() {
+  test('some test', function() {
     // ...
   });
 
@@ -49,7 +44,7 @@ QUnit CLIB has been tested in at least Node.js 0.4.8-0.10.13, Narwhal 0.3.2, Pha
 
 ## Footnotes
 
-  1. QUnit v1.3.0 and v1.12.0 are not supported by QUnit CLIB
+  1. QUnit v1.3.0 and v1.12.0 are not supported by QUnit Extras CLI additions
   2. Rhino v1.7RC4 does not support timeout fallbacks `clearTimeout` and `setTimeout`
 
 ## Author
