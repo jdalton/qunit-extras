@@ -28,8 +28,7 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.22, Narwhal 0.3.2, 
     );
   }());
 
-  // explicitly call `QUnit.module()` instead of `module()`
-  // in case we are in a CLI environment
+  // call `QUnit.module()` instead of `module()` when in a CLI
   QUnit.module('some test module');
 
   test('some test', function() {
