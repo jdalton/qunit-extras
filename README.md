@@ -9,24 +9,56 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.24, Narwhal 0.3.2, 
 ## Usage
 
 ```js
-;(function(root) {
-  'use strict';
+;(function() {
+
+  // reference the global object
+  var root = typeof global == 'object' && global || this;
 
   // use a single "load" function
-  var load = typeof require == 'function' ? require : root.load;
+  var load = (typeof require == 'function' && !(root.define && define.amd))
+    ? require
+    : (!root.document && root.java && root.load);
 
-  // load QUnit and extras if needed
+  // load QUnit in a way to workaround cross-environment issues
   var QUnit = (function() {
     var noop = Function.prototype;
     return  root.QUnit || (
       root.addEventListener || (root.addEventListener = noop),
       root.setTimeout || (root.setTimeout = noop),
-      root.QUnit = load('../vendor/qunit/qunit/qunit.js') || root.QUnit,
-      (load('../vendor/qunit-extras/qunit-extras.js') || { 'runInContext': noop }).runInContext(root),
+      root.QUnit = load('path/to/qunit.js') || root.QUnit,
       addEventListener === noop && delete root.addEventListener,
       root.QUnit
     );
   }());
+
+  // load and install QUnit Extras
+  if (load) {
+    var qe = load('path/to/qunit-extras.js');
+    qe.runInContext(root);
+  }
+
+  // set the number of retries async tests make attempt
+  QUnit.config.asyncRetries = 10;
+
+  // excuse tests
+  QUnit.config.excused = {
+    // specify the module name
+    'qunit module': {
+      // excuse individual asserts in a test
+      'a qunit test': [
+        // excuse by assert message
+        'assert message',
+
+        // excuse by expected result
+        '[1,2,3]',
+
+        // excuse by error indicator
+        'Died on test #1',
+      ],
+      // or excuse an entire test
+      'another qunit test': true
+    }
+  };
 
   // call `QUnit.module()` instead of `module()` when in a CLI
   QUnit.module('some test module');
@@ -35,10 +67,11 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.24, Narwhal 0.3.2, 
     // ...
   });
 
+  // call `QUnit.start()` when in a CLI or PhantomJS
   if (!root.document || root.phantom) {
     QUnit.start();
   }
-}(typeof global == 'object' && global || this));
+}.call(this));
 ```
 
 ## Footnotes
