@@ -11,17 +11,19 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.24, Narwhal 0.3.2, 
 ```js
 ;(function() {
 
-  // reference the global object
+  // used as reference to the global object
   var root = typeof global == 'object' && global || this;
+
+  // used as a no-op function
+  var noop = Function.prototype;
 
   // use a single "load" function
   var load = (typeof require == 'function' && !(root.define && define.amd))
     ? require
-    : (!root.document && root.java && root.load);
+    : (!root.document && root.java && root.load) || noop;
 
   // load QUnit in a way to workaround cross-environment issues
   var QUnit = (function() {
-    var noop = Function.prototype;
     return  root.QUnit || (
       root.addEventListener || (root.addEventListener = noop),
       root.setTimeout || (root.setTimeout = noop),
@@ -32,8 +34,8 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.24, Narwhal 0.3.2, 
   }());
 
   // load and install QUnit Extras
-  if (load) {
-    var qe = load('path/to/qunit-extras.js');
+  var qe = load('path/to/qunit-extras.js');
+  if (qe) {
     qe.runInContext(root);
   }
 
