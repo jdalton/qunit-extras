@@ -301,12 +301,12 @@
     QUnit.config.extrasData = {
 
       /**
-       * An array of test summaries.
+       * An array of assertion logs.
        *
        * @memberOf QUnit.config.extrasData
        * @type Array
        */
-      'assertions': []
+      'logs': []
     };
 
     /**
