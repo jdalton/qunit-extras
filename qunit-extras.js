@@ -61,8 +61,8 @@
    *
    * @oruvate
    * @param {Array} array The array to iterate over.
-   * @param {*} target The value to check for.
-   * @returns {boolean} Returns `true` if the `target` element is found, else `false`.
+   * @param {*} value The value to check for.
+   * @returns {boolean} Returns `true` if the `value` is found, else `false`.
    */
   function contains(array, value) {
     var index = -1,
@@ -167,7 +167,7 @@
      * @private
      * @param {Function|string} fn The function to call.
      * @param {number} delay The number of milliseconds to delay the `fn` call.
-     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+     * @param {Array} args Arguments to invoke `fn` with.
      * @param {boolean} repeated A flag to specify whether `fn` is called repeatedly.
      * @returns {number} The ID of the timeout.
      */
@@ -217,7 +217,7 @@
      * @memberOf context
      * @param {Function|string} fn The function to call or string to evaluate.
      * @param {number} delay The number of milliseconds to delay each `fn` call.
-     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+     * @param {...*} [args] Arguments to invoke `fn` with.
      * @returns {number} The ID of the timeout.
      */
     function setInterval(fn, delay) {
@@ -230,7 +230,7 @@
      * @memberOf context
      * @param {Function|string} fn The function to call or string to evaluate.
      * @param {number} delay The number of milliseconds to delay the `fn` call.
-     * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
+     * @param {...*} [args] Arguments to invoke `fn` with.
      * @returns {number} The ID of the timeout.
      */
     function setTimeout(fn, delay) {
