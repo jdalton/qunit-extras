@@ -4,7 +4,7 @@ Extends QUnit with extra features and CLI support.
 
 ## Support
 
-QUnit Extras has been tested in at least Node.js 0.6.21~0.10.24, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
+QUnit Extras has been tested in at least Node.js 0.6.21~0.10.25, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
 
 ## Usage
 
@@ -78,7 +78,7 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.24, Narwhal 0.3.2, 
 
 ## Footnotes
 
-  1. QUnit v1.3.0 and v1.12.0 are not supported by QUnit Extras CLI additions
+  1. QUnit v1.3.0 and v1.12.0-v1.14.0 are not fully supported by QUnit Extras CLI additions
   2. Rhino v1.7RC4 does not support timeout fallbacks `clearTimeout` and `setTimeout`
 
 ## Author
