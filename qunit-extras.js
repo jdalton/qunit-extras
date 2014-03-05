@@ -23,6 +23,13 @@
       reExpected = /Expected: *<\/th><td><pre>([\s\S]*?)<\/pre>/,
       reMessage = /^<span class='test-message'>([\s\S]*?)<\/span>/;
 
+  /** Used to associate color names with their corresponding codes */
+  var colorCodes = {
+    'blue': 34,
+    'green': 32,
+    'red': 31
+  };
+
   /** Used to convert HTML entities to characters */
   var htmlUnescapes = {
     '&amp;': '&',
@@ -149,8 +156,25 @@
         document = !phantom && context.document,
         java = context.java;
 
+    /** Detect the OS of the platform */
+    var os = (function() {
+      if (java) {
+        return java.lang.System.getProperty('os.name');
+      }
+      if (phantom) {
+        return require('system').os.name;
+      }
+      if (process) {
+        return process.platform;
+      }
+      return '';
+    }());
+
     /** Detects if running in a PhantomJS web page */
     var isPhantomPage = typeof context.callPhantom == 'function';
+
+    /** Used to indicate if running in Windows */
+    var isWindows = /win/i.test(os);
 
     /** Used to display the wait throbber */
     var throbberId,
@@ -161,44 +185,6 @@
     var QUnit = context.QUnit = context.QUnit.QUnit || context.QUnit;
 
     /*------------------------------------------------------------------------*/
-
-    /**
-     * Adds `color` to the terminal output of `string`.
-     *
-     * @private
-     * @param {string} color The color to add.
-     * @param {string} string The string to add colors to.
-     * @returns {string} Returns the colored string.
-     */
-
-     var color = (function() {
-      var colors = {
-        'blue': [34, 39],
-        'green': [32, 39],
-        'red': [31, 39]
-      };
-      var os = (function() {
-        var os = '';
-        if (phantom) {
-          os = require('system').os.name;
-        }
-        if (typeof process == 'object' && process && process.on) {
-          os = process.platform;
-        }
-        if (java) {
-          os = java.lang.System.getProperty('os.name');
-        }
-        return os;
-      }());
-      var isWindows = /win/i.test(os);
-
-      return function(color, string) {
-        var val = colors[color];
-        return isWindows
-          ? string
-          : ('\x1b[' + val[0] + 'm' + string + '\x1b[' + val[1] + 'm')
-      };
-     }());
 
     /**
      * Schedules timer-based callbacks.
@@ -277,6 +263,21 @@
     }
 
     /*------------------------------------------------------------------------*/
+
+    /**
+     * Adds text color to the terminal output of `string`.
+     *
+     * @private
+     * @param {string} colorName The name of the color to add.
+     * @param {string} string The string to add colors to.
+     * @returns {string} Returns the colored string.
+     */
+    function color(colorName, string) {
+      var code = colorCodes[colorName];
+      return isWindows
+        ? string
+        : ('\x1b[' + code + 'm' + string + '\x1b[0m');
+    }
 
     /**
      * Writes an inline message to standard output.
