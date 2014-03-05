@@ -59,7 +59,7 @@
    * Checks if a given value is present in an array using strict equality
    * for comparisons, i.e. `===`.
    *
-   * @oruvate
+   * @private
    * @param {Array} array The array to iterate over.
    * @param {*} value The value to check for.
    * @returns {boolean} Returns `true` if the `value` is found, else `false`.
@@ -146,7 +146,8 @@
     var console = context.console,
         phantom = context.phantom,
         process = phantom || context.process,
-        document = !phantom && context.document;
+        document = !phantom && context.document,
+        java = context.java;
 
     /** Detects if running in a PhantomJS web page */
     var isPhantomPage = typeof context.callPhantom == 'function';
@@ -160,6 +161,44 @@
     var QUnit = context.QUnit = context.QUnit.QUnit || context.QUnit;
 
     /*------------------------------------------------------------------------*/
+
+    /**
+     * Adds `color` to the terminal output of `string`.
+     *
+     * @private
+     * @param {string} color The color to add.
+     * @param {string} string The string to add colors to.
+     * @returns {string} Returns the colored string.
+     */
+
+     var color = (function() {
+      var colors = {
+        'blue': [34, 39],
+        'green': [32, 39],
+        'red': [31, 39]
+      };
+      var os = (function() {
+        var os = '';
+        if (phantom) {
+          os = require('system').os.name;
+        }
+        if (typeof process == 'object' && process && process.on) {
+          os = process.platform;
+        }
+        if (java) {
+          os = java.lang.System.getProperty('os.name');
+        }
+        return os;
+      }());
+      var isWindows = /win/i.test(os);
+
+      return function(color, string) {
+        var val = colors[color];
+        return isWindows
+          ? string
+          : ('\x1b[' + val[0] + 'm' + string + '\x1b[' + val[1] + 'm')
+      };
+     }());
 
     /**
      * Schedules timer-based callbacks.
@@ -412,8 +451,8 @@
 
           logInline('');
           console.log(hr);
-          console.log('    PASS: ' + details.passed + '  FAIL: ' + failures + '  TOTAL: ' + details.total);
-          console.log('    Finished in ' + details.runtime + ' milliseconds.');
+          console.log(color('blue', '    PASS: ' + details.passed + '  FAIL: ' + failures + '  TOTAL: ' + details.total));
+          console.log(color(failures ? 'red' : 'green','    Finished in ' + details.runtime + ' milliseconds.'));
           console.log(hr);
 
           // exit out of Node.js or PhantomJS
@@ -443,13 +482,13 @@
             type = typeof expected != 'undefined' ? 'EQ' : 'OK';
 
         var message = [
-          result ? 'PASS' : 'FAIL',
-          type,
-          details.message || 'ok'
+          result ? color('green', 'PASS') : color('red', 'FAIL'),
+          color('blue', type),
+          color('blue', details.message || 'ok')
         ];
 
         if (!result && type == 'EQ') {
-          message.push('Expected: ' + expected + ', Actual: ' + details.actual);
+          message.push(color('blue', 'Expected: ' + expected + ', Actual: ' + details.actual));
         }
         QUnit.config.extrasData.logs.push(message.join(' | '));
       });
@@ -481,10 +520,10 @@
           if (!modulePrinted) {
             modulePrinted = true;
             console.log(hr);
-            console.log(moduleName);
+            console.log(color('blue', moduleName));
             console.log(hr);
           }
-          console.log(' ' + (failures ? 'FAIL' : 'PASS') + ' - ' + testName);
+          console.log(' ' + (failures ? color('red', 'FAIL') : color('green', 'PASS')) + ' - ' + color('blue', testName));
 
           if (failures) {
             var index = -1,
