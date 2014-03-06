@@ -513,10 +513,12 @@
       QUnit.testDone(function(details) {
         var config = QUnit.config,
             failures = details.failed,
+            hidepassed = config.hidepassed,
+            log = '',
             logs = config.extrasData.logs,
             testName = details.name;
 
-        if (!config.hidepassed || failures) {
+        if (hidepassed || failures) {
           logInline('');
           if (!modulePrinted) {
             modulePrinted = true;
@@ -531,7 +533,10 @@
                 length = logs.length;
 
             while(++index < length) {
-              console.log('    ' + logs[index]);
+              log = logs[index];
+              if (!hidepassed || /FAIL/.test(log)) {
+                console.log('    ' + log);
+              }
             }
           }
         }
