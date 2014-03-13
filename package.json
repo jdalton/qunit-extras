@@ -7,7 +7,7 @@
   "keywords": ["qunit", "cli"],
   "author": "John-David Dalton <john.david.dalton@gmail.com> (http://allyoucanleet.com/)",
   "bugs": "https://github.com/jdalton/qunit-extras/issues",
-  "repository": { "type": "git", "url": "git://github.com/jdalton/qunit-extras.git" },
+  "repository": "jdalton/qunit-extras",
   "engines": ["node", "rhino"],
   "files": [
     "LICENSE.txt",
