@@ -1,4 +1,4 @@
-# QUnit Extras <sup>v1.0.0</sup>
+# QUnit Extras <sup>v1.1.0</sup>
 
 Extends QUnit with extra features and CLI support.
 
