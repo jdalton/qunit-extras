@@ -12,5 +12,11 @@
   "files": [
     "LICENSE.txt",
     "qunit-extras.js"
-  ]
+  ],
+  "devDependencies": {
+    "qunitjs": "~1.11.0"
+  },
+  "scripts": {
+    "test": "node test/test.js"
+  }
 }

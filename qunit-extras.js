@@ -24,10 +24,12 @@
       reMessage = /^<span class='test-message'>([\s\S]*?)<\/span>/;
 
   /** Used to associate color names with their corresponding codes */
-  var colorCodes = {
-    'blue': 34,
+  var ansiCodes = {
+    'bold': 1,
     'green': 32,
-    'red': 31
+    'magenta': 35,
+    'red': 31,
+    'white': 37
   };
 
   /** Used to convert HTML entities to characters */
@@ -276,10 +278,10 @@
      * @returns {string} Returns the colored string.
      */
     function color(colorName, string) {
-      var code = colorCodes[colorName];
+      var code = ansiCodes[colorName];
       return isWindows
         ? string
-        : ('\x1b[' + code + 'm' + string + '\x1b[0m');
+        : ('\x1B[' + code + 'm' + string + '\x1B[0m');
     }
 
     /**
@@ -455,11 +457,11 @@
           ran = true;
 
           var failures = details.failed;
-
+          var statusColor = failures ? 'magenta' : 'green';
           logInline('');
           console.log(hr);
-          console.log(color('blue', '    PASS: ' + details.passed + '  FAIL: ' + failures + '  TOTAL: ' + details.total));
-          console.log(color(failures ? 'red' : 'green','    Finished in ' + details.runtime + ' milliseconds.'));
+          console.log(color(statusColor, '    PASS: ' + details.passed + '  FAIL: ' + failures + '  TOTAL: ' + details.total));
+          console.log(color(statusColor, '    Finished in ' + details.runtime + ' milliseconds.'));
           console.log(hr);
 
           // exit out of Node.js or PhantomJS
@@ -519,10 +521,10 @@
         if (!modulePrinted) {
           modulePrinted = true;
           console.log(hr);
-          console.log(color('blue', moduleName));
+          console.log(color('bold', moduleName));
           console.log(hr);
         }
-        console.log(' ' + (failures ? color('red', 'FAIL') : color('green', 'PASS')) + ' - ' + color('blue', testName));
+        console.log(' ' + (failures ? color('red', 'FAIL') : color('green', 'PASS')) + ' - ' + testName);
 
         if (!failures) {
           return;
@@ -541,12 +543,12 @@
 
           var message = [
             result ? color('green', 'PASS') : color('red', 'FAIL'),
-            color('blue', type),
-            color('blue', entry.message || 'ok')
+            type,
+            entry.message || 'ok'
           ];
 
           if (!result && type == 'EQ') {
-            message.push(color('blue', 'Expected: ' + expected + ', Actual: ' + entry.actual));
+            message.push(color('magenta', 'Expected: ' + expected + ', Actual: ' + entry.actual));
           }
           console.log('    ' + message.join(' | '));
         }
