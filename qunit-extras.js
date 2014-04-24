@@ -177,7 +177,7 @@
     var isSilent = document && !isPhantomPage;
 
     /** Used to indicate if running in Windows */
-    var isWindows = /win/i.test(os);
+    var isWindows = /\bwin/i.test(os);
 
     /** Used to display the wait throbber */
     var throbberId,
