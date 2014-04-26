@@ -182,8 +182,7 @@
     var isWindows = /\bwin/i.test(os);
 
     /** Used to display the wait throbber */
-    var throbberId,
-        throbberDelay = 500,
+    var throbberDelay = 500,
         waitCount = -1;
 
     /** Shorten `context.QUnit.QUnit` to `context.QUnit` */
@@ -497,11 +496,6 @@
           moduleName = newModuleName;
           modulePrinted = false;
         }
-        // initialize the wait throbber
-        if (!throbberId) {
-          throbberId = context.setInterval(logThrobber, throbberDelay);
-          logThrobber();
-        }
       });
 
       // add a callback to be triggered after a test is completed
@@ -608,9 +602,6 @@
         }());
       } catch(e) { }
 
-      // add `console.log` support to Narwhal, Rhino, and RingoJS
-      console || (console = context.console = { 'log': context.print });
-
       // expose shortcuts
       // exclude `module` because some environments have it as a built-in object
       ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notStrictEqual ' +
@@ -618,6 +609,14 @@
         context[methodName] = QUnit[methodName];
       });
 
+      // add `console.log` support to Narwhal, Rhino, and RingoJS
+      if (!console) {
+        console = context.console = { 'log': context.print };
+      }
+      // start log throbber
+      if (!isSilent) {
+        context.setInterval(logThrobber, throbberDelay);
+      }
       // must call `QUnit.start` in the test file if not loaded in a browser
       QUnit.config.autostart = false;
       QUnit.init();
