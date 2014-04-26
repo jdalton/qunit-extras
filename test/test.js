@@ -1,4 +1,7 @@
-(function() {
+;(function() {
+
+  /** Used as a safe reference for `undefined` in pre ES5 environments */
+  var undefined;
 
   // used as reference to the global object
   var root = typeof global == 'object' && global || this;
@@ -28,25 +31,32 @@
     qe.runInContext(root);
   }
 
+  /*--------------------------------------------------------------------------*/
+
   // call `QUnit.module()` instead of `module()` when in a CLI
   QUnit.module('qunit-extras');
 
-  test('Some test with a title', function() {
+  test('Some test with a title', 4, function() {
     equal(1, 1, 'foo');
     equal(2, 2, 'bar');
     equal('a', 'a', 'baz');
     equal('b', 'b', 'qux');
   });
 
-  test('Some other test with a title', function() {
+  test('Some other test with a title', 4, function() {
     equal(1, 2, 'foo');
     equal(2, 2, 'bar');
     equal('a', 'a', 'baz');
     equal('b', 'b', 'qux');
   });
 
-  // call `QUnit.start()` when in a CLI or PhantomJS
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.config.asyncRetries = 10;
+  QUnit.config.hidepassed = true;
+
   if (!root.document || root.phantom) {
+    QUnit.config.noglobals = true;
     QUnit.start();
   }
 }.call(this));
