@@ -501,7 +501,7 @@
 
           var assertMessage = isStr ? assert : unescape(result(reMessage.exec(message), 1)),
               assertValue = isStr ? assert : unescape(result(reExpected.exec(message), 1)),
-              assertDied = result(reDied.exec(message), 0);
+              assertDied = result(reDied.exec(assertMessage), 0);
 
           if ((assertMessage && contains(excusedAsserts, assertMessage)) ||
               (assertDied && contains(excusedAsserts, assertDied)) ||
