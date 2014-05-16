@@ -153,6 +153,7 @@
     /** Object shortcuts */
     var console = context.console,
         phantom = context.phantom,
+        print = context.print,
         process = phantom || context.process,
         document = !phantom && context.document,
         java = !document && context.java;
@@ -612,8 +613,8 @@
       });
 
       // add `console.log` support to Narwhal, Rhino, and RingoJS
-      if (!console) {
-        console = context.console = { 'log': context.print };
+      if (!console && typeof print == 'function') {
+        console = context.console = { 'log': print };
       }
       // start log throbber
       if (!isSilent) {
