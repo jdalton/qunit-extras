@@ -12,7 +12,7 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.28, Narwhal 0.3.2, 
 ;(function() {
 
   // used as reference to the global object
-  var root = typeof global == 'object' && global || this;
+  var root = (typeof global == 'object' && global) || this;
 
   // used as a no-op function
   var noop = Function.prototype;
@@ -39,7 +39,7 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.28, Narwhal 0.3.2, 
     qe.runInContext(root);
   }
 
-  // set the number of retries async tests make attempt
+  // set the number of retries async tests may attempt
   QUnit.config.asyncRetries = 10;
 
   // excuse tests
@@ -86,3 +86,9 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.28, Narwhal 0.3.2, 
 | [![twitter/jdalton](http://gravatar.com/avatar/299a3d891ff1920b69c364d061007043?s=70)](https://twitter.com/jdalton "Follow @jdalton on Twitter") |
 |---|
 | [John-David Dalton](http://allyoucanleet.com/) |
+
+## Contributors
+
+| [![twitter/kitcambridge](http://gravatar.com/avatar/6662a1d02f351b5ef2f8b4d815804661?s=70)](https://twitter.com/kitcambridge "Follow @kitcambridge on Twitter") | [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter") |
+|---|---|---|
+| [Kit Cambridge](http://kitcambridge.be/) | [Mathias Bynens](http://mathiasbynens.be/) |
