@@ -1,4 +1,4 @@
-# QUnit Extras <sup>v1.1.0</sup>
+# QUnit Extras <sup>v1.2.0</sup>
 
 Extends QUnit with extra features and CLI support.
 
@@ -90,5 +90,5 @@ QUnit Extras has been tested in at least Node.js 0.6.21~0.10.28, Narwhal 0.3.2, 
 ## Contributors
 
 | [![twitter/demoneaux](http://gravatar.com/avatar/029b19dba521584d83398ada3ecf6131?s=70)](https://twitter.com/demoneaux "Follow @demoneaux on Twitter") | [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter") |
-|---|
+|---|---|
 | [Benjamin Tan](http://d10.github.io/) | [Mathias Bynens](http://mathiasbynens.be/) |
