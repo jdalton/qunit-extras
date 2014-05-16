@@ -85,6 +85,19 @@
   }
 
   /**
+   * Checks if `value` is the language type of `Object`.
+   * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+   */
+  function isObject(value) {
+    var type = typeof value;
+    return type == 'function' || (value && type == 'object') || false;
+  }
+
+  /**
    * Creates a string with `text` repeated `n` number of times.
    *
    * @private
@@ -151,14 +164,18 @@
         modulePrinted;
 
     /** Object shortcuts */
-    var console = context.console,
-        phantom = context.phantom,
-        process = phantom || context.process,
+    var phantom = context.phantom,
+        define = context.define,
         document = !phantom && context.document,
-        java = !document && context.java;
+        process = phantom || context.process,
+        amd = define && define.amd,
+        console = context.console,
+        java = !document && context.java,
+        print = context.print,
+        require = context.require;
 
     /** Detects if running on Node.js */
-    var isNode = process === context.process && typeof process == 'object' && typeof process.binding == 'function';
+    var isNode = isObject(process) && typeof process.on == 'function';
 
     /** Detects if running in a PhantomJS web page */
     var isPhantomPage = typeof context.callPhantom == 'function';
@@ -166,31 +183,18 @@
     /** Detects if QUnit Extras should log to the console */
     var isSilent = document && !isPhantomPage;
 
+    /** Used to indicate if running in Windows */
+    var isWindows = isNode && process.platform == 'win32';
+
     /** Used to indicate if ANSI escape codes are supported */
     var isAnsiSupported = (function() {
       if (isNode && process.stdout && !process.stdout.isTTY) {
         return false;
       }
-
-      if (isNode && process.platform == 'win32') {
+      if (isWindows || getEnv('COLORTERM')) {
         return true;
       }
-
-      if (!!getEnv('COLORTERM')) {
-        return true;
-      }
-
-      var TERM = getEnv('TERM');
-
-      if (TERM == 'dumb') {
-        return false;
-      }
-
-      if (/^screen|^xterm|^vt100|color|ansi|cygwin|linux/i.test(TERM)) {
-        return true;
-      }
-
-      return false;
+      return /^(?:ansi|cygwin|linux|screen|xterm|vt100)$|color/i.test(getEnv('TERM'));
     }());
 
     /** Used to display the wait throbber */
@@ -281,29 +285,24 @@
     /*------------------------------------------------------------------------*/
 
     /**
-     * Obtains a given environment variable.
+     * Gets the environment variable value by a given name.
      *
      * @private
-     * @param {string} name Name of the environment variable to obtain. */
+     * @param {string} name The name of the environment variable to get.
+     * @returns {*} Returns the environment variable value.
+     */
     function getEnv(name) {
       if (isNode) {
         return process.env[name];
       }
-
-      if (typeof context.require == 'function' && typeof context.define != 'object') {
-        try {
-          var env = require('system').env;
-        } catch(e) {}
-        if (env) {
-          return env[name];
-        }
-      }
-
       if (java) {
         return java.lang.System.getenv(name);
       }
-
-      return null;
+      if (!amd && typeof require == 'function') {
+        try {
+          return require('system').env[name];
+        } catch(e) { }
+      }
     }
 
     /**
@@ -315,9 +314,8 @@
      * @returns {string} Returns the colored string.
      */
     function color(colorName, string) {
-      var code = ansiCodes[colorName];
       return isAnsiSupported
-        ? ('\x1B[' + code + 'm' + string + '\x1B[0m')
+        ? ('\x1B[' + ansiCodes[colorName] + 'm' + string + '\x1B[0m')
         : string;
     }
 
@@ -328,9 +326,7 @@
      * @param {string} [text=''] The text to log.
      */
     var logInline = (function() {
-      // exit early if not Node.js
-      if (!(typeof process == 'object' && process &&
-          process.on && process.stdout && process.platform != 'win32')) {
+      if (!isNode || isWindows) {
         return function() {};
       }
       // cleanup any inline logs when exited via `ctrl+c`
@@ -651,10 +647,12 @@
       });
 
       // add `console.log` support to Narwhal, Rhino, and RingoJS
-      if (typeof context.print == 'function') {
-        console || (console = context.console = {});
-        // RingoJS removes ANSI escape codes in `console.log`, but not in `print()`
-        console.log = context.print;
+      if (!console) {
+        console = context.console = { 'log': function() {} };
+      }
+      // RingoJS removes ANSI escape codes in `console.log`, but not in `print`
+      if (java && typeof print == 'function') {
+        console.log = print;
       }
       // start log throbber
       if (!isSilent) {
