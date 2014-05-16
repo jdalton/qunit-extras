@@ -153,24 +153,12 @@
     /** Object shortcuts */
     var console = context.console,
         phantom = context.phantom,
-        print = context.print,
         process = phantom || context.process,
         document = !phantom && context.document,
         java = !document && context.java;
 
-    /** Detect the OS of the platform */
-    var os = (function() {
-      if (java) {
-        return java.lang.System.getProperty('os.name');
-      }
-      if (phantom) {
-        return require('system').os.name;
-      }
-      if (process) {
-        return process.platform;
-      }
-      return '';
-    }());
+    /** Detects if running on Node.js */
+    var isNode = process === context.process && typeof process == 'object' && typeof process.binding == 'function';
 
     /** Detects if running in a PhantomJS web page */
     var isPhantomPage = typeof context.callPhantom == 'function';
@@ -178,8 +166,32 @@
     /** Detects if QUnit Extras should log to the console */
     var isSilent = document && !isPhantomPage;
 
-    /** Used to indicate if running in Windows */
-    var isWindows = /\bwin/i.test(os);
+    /** Used to indicate if ANSI escape codes are supported */
+    var isAnsiSupported = (function() {
+      if (isNode && process.stdout && !process.stdout.isTTY) {
+        return false;
+      }
+
+      if (isNode && process.platform == 'win32') {
+        return true;
+      }
+
+      if (!!getEnv('COLORTERM')) {
+        return true;
+      }
+
+      var TERM = getEnv('TERM');
+
+      if (TERM == 'dumb') {
+        return false;
+      }
+
+      if (/^screen|^xterm|^vt100|color|ansi|cygwin|linux/i.test(TERM)) {
+        return true;
+      }
+
+      return false;
+    }());
 
     /** Used to display the wait throbber */
     var throbberDelay = 500,
@@ -269,6 +281,32 @@
     /*------------------------------------------------------------------------*/
 
     /**
+     * Obtains a given environment variable.
+     *
+     * @private
+     * @param {string} name Name of the environment variable to obtain. */
+    function getEnv(name) {
+      if (isNode) {
+        return process.env[name];
+      }
+
+      if (typeof context.require == 'function' && typeof context.define != 'object') {
+        try {
+          var env = require('system').env;
+        } catch(e) {}
+        if (env) {
+          return env[name];
+        }
+      }
+
+      if (java) {
+        return java.lang.System.getenv(name);
+      }
+
+      return null;
+    }
+
+    /**
      * Adds text color to the terminal output of `string`.
      *
      * @private
@@ -278,9 +316,9 @@
      */
     function color(colorName, string) {
       var code = ansiCodes[colorName];
-      return isWindows
-        ? string
-        : ('\x1B[' + code + 'm' + string + '\x1B[0m');
+      return isAnsiSupported
+        ? ('\x1B[' + code + 'm' + string + '\x1B[0m')
+        : string;
     }
 
     /**
@@ -613,8 +651,10 @@
       });
 
       // add `console.log` support to Narwhal, Rhino, and RingoJS
-      if (!console && typeof print == 'function') {
-        console = context.console = { 'log': print };
+      if (typeof context.print == 'function') {
+        console || (console = context.console = {});
+        // RingoJS removes ANSI escape codes in `console.log`, but not in `print()`
+        console.log = context.print;
       }
       // start log throbber
       if (!isSilent) {
