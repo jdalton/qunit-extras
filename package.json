@@ -11,7 +11,6 @@
     "Benjamin Tan <demoneaux@gmail.com> (http://d10.github.io/)",
     "Mathias Bynens <mathias@qiwi.be> (http://mathiasbynens.be/)"
   ],
-  "bugs": "https://github.com/jdalton/qunit-extras/issues",
   "repository": "jdalton/qunit-extras",
   "engines": ["node", "rhino"],
   "files": [
