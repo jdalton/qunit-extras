@@ -178,10 +178,6 @@
    */
   function runInContext(context) {
 
-    /** Used to report the test module for failing tests */
-    var moduleName,
-        modulePrinted;
-
     /** Object references */
     var phantom = context.phantom,
         define = context.define,
@@ -404,18 +400,68 @@
     QUnit.config.extrasData = {
 
       /**
-       * An array of details for each log entry.
+       * The data object for the active test module.
        *
        * @memberOf QUnit.config.extrasData
-       * @type Array
+       * @type Object
        */
-      'logEntries': []
+      'module': {},
+
+      /**
+       * The data object for Sauce Labs.
+       *
+       * @memberOf QUnit.config.extrasData
+       * @type Object
+       */
+      'sauce': {
+
+        /**
+         * An array of failed test details.
+         *
+         * @memberOf QUnit.config.extrasData.sauce
+         * @type Array
+         */
+        'tests': []
+      }
     };
 
-    // add a callback to be triggered when all testing has completed
-    QUnit.done(function(details) {
-      // assign results to `global_test_results` for Sauce Labs
-      context.global_test_results = details;
+    /**
+     * Converts an object into a string representation.
+     *
+     * @memberOf QUnit
+     * @type Function
+     * @param {Object} object The object to stringify.
+     * @returns {string} The result string.
+     */
+    QUnit.jsDump.parsers.object = (function() {
+      var func = QUnit.jsDump.parsers.object;
+      if (isSilent) {
+        return func;
+      }
+      return function(object) {
+        if (typeof object.rhinoException != 'object') {
+          return func(object);
+        }
+        return object.name +
+          ' { message: "' + object.message +
+          '", fileName: "' + object.fileName +
+          '", lineNumber: ' + object.lineNumber + ' }';
+      };
+    }());
+
+    /*------------------------------------------------------------------------*/
+
+    // add a callback to be triggered after every assertion
+    QUnit.log(function(details) {
+      QUnit.config.extrasData.module.logs.push(details);
+    });
+
+    // add a callback to be triggered at the start of every test module
+    QUnit.moduleStart(function(details) {
+      var module = QUnit.config.extrasData.module;
+      module.name = details.name;
+      module.logs = [];
+      module.printed = false;
     });
 
     // add a callback to be triggered at the start of every test
@@ -435,19 +481,17 @@
               config = QUnit.config,
               index = -1,
               length = asserts.length,
-              entries = config.extrasData.logEntries,
+              logs = config.extrasData.module.logs,
               queue = config.queue;
 
           while (++index < length) {
             var assert = asserts[index];
             if (!assert.result && this.retries < config.asyncRetries) {
-              if (!isSilent) {
-                entries.length -= asserts.length;
-              }
-              this.retries++;
+              var oldLength = queue.length;
+              logs.length -= asserts.length;
               asserts.length = 0;
 
-              var oldLength = queue.length;
+              this.retries++;
               this.queue();
 
               unshift.apply(queue, queue.splice(oldLength, queue.length - oldLength));
@@ -520,140 +564,101 @@
       });
     });
 
-    // replace poisoned `raises` method
-    context.raises = QUnit.raises = QUnit['throws'] || QUnit.raises;
+    // add a callback to be triggered after a test is completed
+    QUnit.testDone(function(details) {
+      var config = QUnit.config,
+          data = config.extrasData,
+          failures = details.failed,
+          hidepassed = config.hidepassed,
+          module = data.module,
+          moduleLogs = module.logs,
+          sauceTests = data.sauce.tests;
 
-    /*------------------------------------------------------------------------*/
-
-    // add logging extras
-    if (!isSilent) {
-      // add a callback to be triggered when all testing has completed
-      QUnit.done(function() {
-        var ran;
-        return function(details) {
-          // stop `asyncTest()` from erroneously calling `done()` twice in
-          // environments w/o timeouts
-          if (ran) {
-            return;
-          }
-          ran = true;
-
-          var failures = details.failed;
-          var statusColor = failures ? 'magenta' : 'green';
-          logInline();
-          console.log(hr);
-          console.log(color(statusColor, '    PASS: ' + details.passed + '  FAIL: ' + failures + '  TOTAL: ' + details.total));
-          console.log(color(statusColor, '    Finished in ' + details.runtime + ' milliseconds.'));
-          console.log(hr);
-
-          // exit out of Node.js or PhantomJS
-          try {
-            if (failures) {
-              process.exit(1);
-            } else {
-              process.exit(0);
-            }
-          } catch(e) {}
-
-          // exit out of Narwhal, Rhino, or RingoJS
-          try {
-            if (failures) {
-              java.lang.System.exit(1);
-            } else {
-              quit();
-            }
-          } catch(e) {}
-        };
-      }());
-
-      // add a callback to be triggered after every assertion
-      QUnit.log(function(details) {
-        QUnit.config.extrasData.logEntries.push(details);
-      });
-
-      // add a callback to be triggered at the start of every test module
-      QUnit.moduleStart(function(details) {
-        // reset the `modulePrinted` flag
-        var newModuleName = details.name;
-        if (moduleName != newModuleName) {
-          moduleName = newModuleName;
-          modulePrinted = false;
-        }
-      });
-
-      // add a callback to be triggered after a test is completed
-      QUnit.testDone(function(details) {
-        var config = QUnit.config,
-            failures = details.failed,
-            hidepassed = config.hidepassed,
-            entries = config.extrasData.logEntries.slice(),
-            testName = details.name;
-
-        config.extrasData.logEntries.length = 0;
-
-        if (hidepassed && !failures) {
-          return;
-        }
+      if (hidepassed && !failures) {
+        return;
+      }
+      if (!isSilent) {
         logInline();
-        if (!modulePrinted) {
-          modulePrinted = true;
+        if (!module.printed) {
+          module.printed = true;
           console.log(hr);
-          console.log(color('bold', moduleName));
+          console.log(color('bold', module.name));
           console.log(hr);
         }
-        console.log(' ' + (failures ? color('red', 'FAIL') : color('green', 'PASS')) + ' - ' + testName);
+        console.log(' ' + (failures ? color('red', 'FAIL') : color('green', 'PASS')) + ' - ' + details.name);
+      }
+      if (!failures) {
+        return;
+      }
+      var index = -1,
+          length = moduleLogs.length;
 
-        if (!failures) {
-          return;
+      while(++index < length) {
+        var entry = moduleLogs[index];
+        if (hidepassed && entry.result) {
+          continue;
         }
-        var index = -1,
-            length = entries.length;
+        var expected = entry.expected,
+            result = entry.result,
+            type = typeof expected != 'undefined' ? 'EQ' : 'OK';
 
-        while(++index < length) {
-          var entry = entries[index];
-          if (hidepassed && entry.result) {
-            continue;
-          }
-          var expected = entry.expected,
-              result = entry.result,
-              type = typeof expected != 'undefined' ? 'EQ' : 'OK';
+        var message = [
+          result ? color('green', 'PASS') : color('red', 'FAIL'),
+          type,
+          entry.message || 'ok'
+        ];
 
-          var message = [
-            result ? color('green', 'PASS') : color('red', 'FAIL'),
-            type,
-            entry.message || 'ok'
-          ];
-
-          if (!result && type == 'EQ') {
-            message.push(color('magenta', 'Expected: ' + expected + ', Actual: ' + entry.actual));
-          }
+        if (!result && type == 'EQ') {
+          message.push(color('magenta', 'Expected: ' + expected + ', Actual: ' + entry.actual));
+        }
+        if (!isSilent) {
           console.log('    ' + message.join(' | '));
         }
-      });
+        if (!entry.result) {
+          sauceTests.push(entry);
+        }
+      }
+    });
 
-      /**
-       * Converts an object into a string representation.
-       *
-       * @memberOf QUnit
-       * @type Function
-       * @param {Object} object The object to stringify.
-       * @returns {string} The result string.
-       */
-      QUnit.jsDump.parsers.object = (function() {
-        var func = QUnit.jsDump.parsers.object;
-        return function(object) {
-          if (typeof object.rhinoException != 'object') {
-            return func(object);
-          }
-          return object.name +
-            ' { message: "' + object.message +
-            '", fileName: "' + object.fileName +
-            '", lineNumber: ' + object.lineNumber + ' }';
-        };
-      }());
-    }
+    // add a callback to be triggered when all testing has completed
+    QUnit.done(function(details) {
+      var failures = details.failed,
+          statusColor = failures ? 'magenta' : 'green';
+
+      if (!isSilent) {
+        logInline();
+        console.log(hr);
+        console.log(color(statusColor, '    PASS: ' + details.passed + '  FAIL: ' + failures + '  TOTAL: ' + details.total));
+        console.log(color(statusColor, '    Finished in ' + details.runtime + ' milliseconds.'));
+        console.log(hr);
+      }
+      // exit out of Node.js or PhantomJS
+      try {
+        if (failures) {
+          process.exit(1);
+        } else {
+          process.exit(0);
+        }
+      } catch(e) {}
+
+      // exit out of Narwhal, Rhino, or RingoJS
+      try {
+        if (failures) {
+          java.lang.System.exit(1);
+        } else {
+          quit();
+        }
+      } catch(e) {}
+
+      // assign results to `global_test_results` for Sauce Labs
+      details.tests = QUnit.config.extrasData.sauce.tests;
+      context.global_test_results = details;
+    });
 
     /*------------------------------------------------------------------------*/
+
+    // replace poisoned `raises` method
+    context.raises = QUnit.raises = QUnit['throws'] || QUnit.raises;
 
     // add CLI extras
     if (!document) {
