@@ -1,4 +1,4 @@
-# QUnit Extras v1.2.0
+# QUnit Extras v1.3.0
 
 Extends QUnit with extra features and CLI support.
 
@@ -79,7 +79,7 @@ Extends QUnit with extra features and CLI support.
 
 ## Support
 
-Tested in Node.js 0.8.26~0.10.28, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
+Tested in Node.js 0.8.26~0.10.33, PhantomJS 1.9.7, RingoJS 0.9, & Rhino 1.7RC5.
 
 ## Author
 
