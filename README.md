@@ -91,4 +91,4 @@ Tested in Node.js 0.8.26~0.10.33, PhantomJS 1.9.7, RingoJS 0.9, & Rhino 1.7RC5.
 
 | [![twitter/demoneaux](http://gravatar.com/avatar/029b19dba521584d83398ada3ecf6131?s=70)](https://twitter.com/demoneaux "Follow @demoneaux on Twitter") | [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter") |
 |---|---|
-| [Benjamin Tan](http://d10.github.io/) | [Mathias Bynens](http://mathiasbynens.be/) |
+| [Benjamin Tan](http://d10.github.io/) | [Mathias Bynens](https://mathiasbynens.be/) |
