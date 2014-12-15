@@ -19,15 +19,13 @@ Extends QUnit with extra features and CLI support.
     : (!root.document && root.java && root.load) || noop;
 
   // load QUnit in a way to workaround cross-environment issues
-  var QUnit = (function() {
-    return  root.QUnit || (
-      root.addEventListener || (root.addEventListener = noop),
-      root.setTimeout || (root.setTimeout = noop),
-      root.QUnit = load('path/to/qunit.js') || root.QUnit,
-      addEventListener === noop && delete root.addEventListener,
-      root.QUnit
-    );
-  }());
+  var QUnit = root.QUnit || (root.QUnit = (
+    root.addEventListener || (root.addEventListener = noop),
+    root.setTimeout || (root.setTimeout = noop),
+    QUnit = load('path/to/qunit.js') || root.QUnit,
+    addEventListener === noop && delete root.addEventListener,
+    QUnit = QUnit.QUnit || QUnit
+  ));
 
   // load and install QUnit Extras
   var qe = load('path/to/qunit-extras.js');
@@ -61,20 +59,21 @@ Extends QUnit with extra features and CLI support.
   // call `QUnit.module()` instead of `module()` when in a CLI
   QUnit.module('some test module');
 
-  test('some test', function() {
+  QUnit.test('some test', function() {
     // ...
   });
 
-  // call `QUnit.start()` when in a CLI or PhantomJS
+  // depending on the version of `QUnit` call either `QUnit.start()` or `QUnit.load()`
+  // when in a CLI or PhantomJS
   if (!root.document || root.phantom) {
-    QUnit.start();
+    QUnit.load();
   }
 }.call(this));
 ```
 
 ## Footnotes
 
-  1. QUnit v1.3.0 and v1.12.0-v1.14.0 are not fully supported by QUnit Extras CLI additions
+  1. QUnit v1.3.0 and v1.12.0-v1.15.0 are not fully supported by QUnit Extras CLI additions
   2. Rhino v1.7RC4 does not support timeout fallbacks `clearTimeout` and `setTimeout`
 
 ## Support

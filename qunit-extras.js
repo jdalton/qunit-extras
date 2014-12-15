@@ -114,16 +114,15 @@
   }
 
   /**
-   * Resolves the value of `property` on `object`. If `object` is falsey then
-   * `undefined` is returned.
+   * Resolves the value of property `key` on `object`.
    *
    * @private
    * @param {Object} object The object to inspect.
-   * @param {string} property The property to get the value of.
+   * @param {string} key The name of the property to resolve.
    * @returns {*} Returns the resolved value.
    */
-  function result(object, property) {
-    return object ? object[property] : undefined;
+  function result(object, key) {
+    return object == null ? undefined : object[key];
   }
 
   /**
@@ -464,6 +463,37 @@
       module.printed = false;
     });
 
+    // wrap old API to intercept `expected` and `message`
+    if (QUnit.push) {
+      QUnit.push = wrap(QUnit.push, function(push, result, actual, expected, message) {
+        push.call(this, result, actual, expected, message);
+
+        var asserts = QUnit.config.current.assertions,
+            item = asserts[asserts.length - 1];
+
+        item.expected = QUnit.jsDump.parse(expected);
+        item.text = message;
+      });
+    }
+    // wrap old API to intercept `message`
+    if (QUnit.pushFailure) {
+      QUnit.pushFailure = wrap(QUnit.pushFailure, function(pushFailure, message, source, actual) {
+        pushFailure.call(this, message, source, actual);
+
+        var asserts = QUnit.config.current.assertions,
+            item = asserts[asserts.length - 1];
+
+        item.expected = '';
+        item.text = message;
+      });
+    }
+    // wrap to flag tests using `assert.async`
+    if (QUnit.assert.async) {
+      QUnit.assert.async = wrap(QUnit.assert.async, function(async) {
+        this.test.usesAsync = true;
+        return async.call(this);
+      });
+    }
     // add a callback to be triggered at the start of every test
     QUnit.testStart(function(details) {
       var config = QUnit.config,
@@ -474,28 +504,30 @@
           excusedAsserts = excusedTests && excusedTests[details.name];
 
       // allow async tests to retry
-      if (test.async && !test.retries) {
+      if (!test.retries) {
         test.retries = 0;
         test.finish = wrap(test.finish, function(finish) {
-          var asserts = this.assertions,
-              config = QUnit.config,
-              index = -1,
-              length = asserts.length,
-              logs = config.extrasData.module.logs,
-              queue = config.queue;
+          if (this.async || this.usesAsync) {
+            var asserts = this.assertions,
+                config = QUnit.config,
+                index = -1,
+                length = asserts.length,
+                logs = config.extrasData.module.logs,
+                queue = config.queue;
 
-          while (++index < length) {
-            var assert = asserts[index];
-            if (!assert.result && this.retries < config.asyncRetries) {
-              var oldLength = queue.length;
-              logs.length -= asserts.length;
-              asserts.length = 0;
+            while (++index < length) {
+              var assert = asserts[index];
+              if (!assert.result && this.retries < config.asyncRetries) {
+                var oldLength = queue.length;
+                logs.length -= asserts.length;
+                asserts.length = 0;
 
-              this.retries++;
-              this.queue();
+                this.retries++;
+                this.queue();
 
-              unshift.apply(queue, queue.splice(oldLength, queue.length - oldLength));
-              return;
+                unshift.apply(queue, queue.splice(oldLength, queue.length - oldLength));
+                return;
+              }
             }
           }
           finish.call(this);
@@ -507,12 +539,32 @@
       }
       // excuse the entire test
       if (excusedAsserts === true) {
-        test.async = false;
+        test.async = test.usesAsync = false;
         test.callback = function() {};
         test.expected = 0;
         return;
       }
-      // excuse specific assertions
+      // wrap to intercept `expected` and `message`
+      if (test.push) {
+        test.push = wrap(test.push, function(push, result, actual, expected, message) {
+          push.call(this, result, actual, expected, message);
+
+          var item = this.assertions[this.assertions.length - 1];
+          item.expected = QUnit.jsDump.parse(expected);
+          item.text = message;
+        });
+      }
+      // wrap to intercept `message`
+      if (test.pushFailure) {
+        test.pushFailure = wrap(test.pushFailure, function(pushFailure, message, source, actual) {
+          pushFailure.call(this, message, source, actual);
+
+          var item = this.assertions[this.assertions.length - 1];
+          item.expected = '';
+          item.text = message;
+        });
+      }
+      // wrap to excuse specific assertions
       test.finish = wrap(test.finish, function(finish) {
         var asserts = this.assertions,
             config = QUnit.config,
@@ -536,11 +588,10 @@
 
         while (++index < length) {
           var assert = items[index],
-              isStr = typeof assert == 'string',
-              message = assert.message;
+              isStr = typeof assert == 'string';
 
-          var assertMessage = isStr ? assert : unescape(result(reMessage.exec(message), 1)),
-              assertValue = isStr ? assert : unescape(result(reExpected.exec(message), 1)),
+          var assertMessage = isStr ? assert : assert.text || unescape(result(reMessage.exec(assert.message), 1)),
+              assertValue = isStr ? assert : assert.expected,
               assertDied = result(reDied.exec(assertMessage), 0);
 
           if ((assertMessage && contains(excusedAsserts, assertMessage)) ||

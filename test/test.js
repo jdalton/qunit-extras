@@ -15,15 +15,13 @@
     : (!root.document && root.java && root.load) || noop;
 
   // load QUnit in a way to workaround cross-environment issues
-  var QUnit = (function() {
-    return  root.QUnit || (
-      root.addEventListener || (root.addEventListener = noop),
-      root.setTimeout || (root.setTimeout = noop),
-      root.QUnit = load('../node_modules/qunitjs/qunit/qunit.js') || root.QUnit,
-      addEventListener === noop && delete root.addEventListener,
-      root.QUnit
-    );
-  }());
+  var QUnit = root.QUnit || (root.QUnit = (
+    root.addEventListener || (root.addEventListener = noop),
+    root.setTimeout || (root.setTimeout = noop),
+    QUnit = load('../node_modules/qunitjs/qunit/qunit.js') || root.QUnit,
+    addEventListener === noop && delete root.addEventListener,
+    QUnit = QUnit.QUnit || QUnit
+  ));
 
   // load and install QUnit Extras
   var qe = load('../qunit-extras.js');
@@ -36,14 +34,14 @@
   // call `QUnit.module()` instead of `module()` when in a CLI
   QUnit.module('qunit-extras');
 
-  test('Some test with a title', 4, function() {
+  QUnit.test('Some test with a title', 4, function() {
     equal(1, 1, 'foo');
     equal(2, 2, 'bar');
     equal('a', 'a', 'baz');
     equal('b', 'b', 'qux');
   });
 
-  test('Some other test with a title', 4, function() {
+  QUnit.test('Some other test with a title', 4, function() {
     equal(1, 2, 'foo');
     equal(2, 2, 'bar');
     equal('a', 'a', 'baz');
@@ -57,6 +55,6 @@
 
   if (!root.document || root.phantom) {
     QUnit.config.noglobals = true;
-    QUnit.start();
+    QUnit.load();
   }
 }.call(this));

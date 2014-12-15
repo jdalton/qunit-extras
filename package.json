@@ -15,7 +15,7 @@
   "scripts": { "test": "node test/test.js" },
   "engines": ["node", "rhino"],
   "devDependencies": {
-    "qunitjs": "~1.11.0"
+    "qunitjs": "~1.16.0"
   },
   "files": [
     "LICENSE.txt",
