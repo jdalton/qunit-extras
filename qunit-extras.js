@@ -24,7 +24,6 @@
 
   /** Used to match parts of the assert message */
   var reDied = /^Died on test #\d+/,
-      reExpected = /Expected: *<\/th><td><pre>([\s\S]*?)<\/pre>/,
       reMessage = /^<span class='test-message'>([\s\S]*?)<\/span>/;
 
   /** Used to associate color names with their corresponding codes */
