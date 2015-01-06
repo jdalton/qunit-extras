@@ -13,7 +13,6 @@
   ],
   "repository": "jdalton/qunit-extras",
   "scripts": { "test": "node test/test.js" },
-  "engines": ["node", "rhino"],
   "devDependencies": {
     "qunitjs": "~1.16.0"
   },
