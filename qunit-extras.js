@@ -1,32 +1,32 @@
 /*!
- * QUnit Extras v1.4.0
+ * QUnit Extras v1.4.1
  * Copyright 2011-2015 John-David Dalton <http://allyoucanleet.com/>
  * Based on a gist by Jörn Zaefferer <https://gist.github.com/722381>
  * Available under MIT license <http://mths.be/mit>
  */
 ;(function() {
 
-  /** Used as a safe reference for `undefined` in pre ES5 environments */
+  /** Used as a safe reference for `undefined` in pre ES5 environments. */
   var undefined;
 
-  /** Used as a horizontal rule in console output */
+  /** Used as a horizontal rule in console output. */
   var hr = '----------------------------------------';
 
-  /** Used for native method references */
+  /** Used for native method references. */
   var arrayProto = Array.prototype;
 
-  /** Native method shortcut */
+  /** Native method shortcut. */
   var push = arrayProto.push,
       unshift = arrayProto.unshift;
 
-  /** Used to match HTML entities */
+  /** Used to match HTML entities. */
   var reEscapedHtml = /(&amp;|&lt;|&gt;|&quot;|&#39;)/g;
 
-  /** Used to match parts of the assert message */
+  /** Used to match parts of the assert message. */
   var reDied = /^Died on test #\d+/,
       reMessage = /^<span class='test-message'>([\s\S]*?)<\/span>/;
 
-  /** Used to associate color names with their corresponding codes */
+  /** Used to associate color names with their corresponding codes. */
   var ansiCodes = {
     'bold': 1,
     'green': 32,
@@ -34,7 +34,7 @@
     'red': 31
   };
 
-  /** Used to convert HTML entities to characters */
+  /** Used to convert HTML entities to characters. */
   var htmlUnescapes = {
     '&amp;': '&',
     '&lt;': '<',
@@ -43,22 +43,22 @@
     '&#39;': "'"
   };
 
-  /** Used to determine if values are of the language type Object */
+  /** Used to determine if values are of the language type Object. */
   var objectTypes = {
     'function': true,
     'object': true
   };
 
-  /** Used as a reference to the global object */
+  /** Used as a reference to the global object. */
   var root = (objectTypes[typeof window] && window) || this;
 
-  /** Detect free variable `exports` */
+  /** Detect free variable `exports`. */
   var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
 
-  /** Detect free variable `module` */
+  /** Detect free variable `module`. */
   var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
 
-  /** Detect free variable `global` from Node.js or Browserified code and use it as `root` */
+  /** Detect free variable `global` from Node.js or Browserified code and use it as `root`. */
   var freeGlobal = freeExports && freeModule && typeof global == 'object' && global;
   if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal || freeGlobal.self === freeGlobal)) {
     root = freeGlobal;
@@ -176,7 +176,7 @@
    */
   function runInContext(context) {
 
-    /** Object references */
+    /** Object references. */
     var phantom = context.phantom,
         define = context.define,
         document = !phantom && context.document,
@@ -187,19 +187,19 @@
         print = context.print,
         require = context.require;
 
-    /** Detects if running on Node.js */
+    /** Detects if running on Node.js. */
     var isNode = isObject(process) && typeof process.on == 'function';
 
-    /** Detects if running in a PhantomJS web page */
+    /** Detects if running in a PhantomJS web page. */
     var isPhantomPage = typeof context.callPhantom == 'function';
 
-    /** Detects if QUnit Extras should log to the console */
+    /** Detects if QUnit Extras should log to the console. */
     var isSilent = document && !isPhantomPage;
 
-    /** Used to indicate if running in Windows */
+    /** Used to indicate if running in Windows. */
     var isWindows = isNode && process.platform == 'win32';
 
-    /** Used to indicate if ANSI escape codes are supported */
+    /** Used to indicate if ANSI escape codes are supported. */
     var isAnsiSupported = (function() {
       if (isNode && process.stdout && !process.stdout.isTTY) {
         return false;
@@ -210,11 +210,11 @@
       return /^(?:ansi|cygwin|linux|screen|xterm|vt100)$|color/i.test(getEnv('TERM'));
     }());
 
-    /** Used to display the wait throbber */
+    /** Used to display the wait throbber. */
     var throbberDelay = 500,
         waitCount = -1;
 
-    /** Shorten `context.QUnit.QUnit` to `context.QUnit` */
+    /** Shorten `context.QUnit.QUnit` to `context.QUnit`. */
     var QUnit = context.QUnit = context.QUnit.QUnit || context.QUnit;
 
     /*------------------------------------------------------------------------*/
@@ -230,25 +230,25 @@
      * @returns {number} The ID of the timeout.
      */
     function schedule(fn, delay, args, repeated) {
-      // Rhino 1.7RC4 will error assigning `task` below
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=775566
+      // Rhino 1.7RC4 will error assigning `task` below.
+      // See https://bugzilla.mozilla.org/show_bug.cgi?id=775566.
       var task = ids[++counter] = new JavaAdapter(java.util.TimerTask, {
         'run': function() {
           fn.apply(context, args);
         }
       });
-      // support non-functions
+      // Support non-functions.
       if (typeof fn != 'function') {
         fn = (function(code) {
           code = String(code);
           return function() { eval(code); };
         }(fn));
       }
-      // used by setInterval
+      // Used by `setInterval`.
       if (repeated) {
         timer.schedule(task, delay, delay);
       }
-      // used by setTimeout
+      // Used by `setTimeout`.
       else {
         timer.schedule(task, delay);
       }
@@ -342,7 +342,7 @@
       if (!isNode || isWindows) {
         return function() {};
       }
-      // cleanup any inline logs when exited via `ctrl+c`
+      // Cleanup any inline logs when exited via `ctrl+c`.
       process.on('SIGINT', function() {
         logInline();
         process.exit();
@@ -449,12 +449,12 @@
 
     /*------------------------------------------------------------------------*/
 
-    // add a callback to be triggered after every assertion
+    // Add a callback to be triggered after every assertion.
     QUnit.log(function(details) {
       QUnit.config.extrasData.module.logs.push(details);
     });
 
-    // add a callback to be triggered at the start of every test module
+    // Add a callback to be triggered at the start of every test module.
     QUnit.moduleStart(function(details) {
       var module = QUnit.config.extrasData.module;
       module.name = details.name;
@@ -462,7 +462,7 @@
       module.printed = false;
     });
 
-    // wrap old API to intercept `expected` and `message`
+    // Wrap old API to intercept `expected` and `message`.
     if (QUnit.push) {
       QUnit.push = wrap(QUnit.push, function(push, result, actual, expected, message) {
         push.call(this, result, actual, expected, message);
@@ -474,7 +474,7 @@
         item.text = message;
       });
     }
-    // wrap old API to intercept `message`
+    // Wrap old API to intercept `message`.
     if (QUnit.pushFailure) {
       QUnit.pushFailure = wrap(QUnit.pushFailure, function(pushFailure, message, source, actual) {
         pushFailure.call(this, message, source, actual);
@@ -486,14 +486,14 @@
         item.text = message;
       });
     }
-    // wrap to flag tests using `assert.async`
+    // Wrap to flag tests using `assert.async`.
     if (QUnit.assert.async) {
       QUnit.assert.async = wrap(QUnit.assert.async, function(async) {
         this.test.usesAsync = true;
         return async.call(this);
       });
     }
-    // add a callback to be triggered at the start of every test
+    // Add a callback to be triggered at the start of every test.
     QUnit.testStart(function(details) {
       var config = QUnit.config,
           test = config.current;
@@ -502,7 +502,7 @@
           excusedTests = excused[details.module],
           excusedAsserts = excusedTests && excusedTests[details.name];
 
-      // allow async tests to retry
+      // Allow async tests to retry.
       if (!test.retries) {
         test.retries = 0;
         test.finish = wrap(test.finish, function(finish) {
@@ -532,18 +532,18 @@
           finish.call(this);
         });
       }
-      // nothing to excuse
+      // Exit early when there is nothing to excuse.
       if (!excusedAsserts) {
         return;
       }
-      // excuse the entire test
+      // Excuse the entire test.
       if (excusedAsserts === true) {
         test.async = test.usesAsync = false;
         test.callback = function() {};
         test.expected = 0;
         return;
       }
-      // wrap to intercept `expected` and `message`
+      // Wrap to intercept `expected` and `message`.
       if (test.push) {
         test.push = wrap(test.push, function(push, result, actual, expected, message) {
           push.call(this, result, actual, expected, message);
@@ -553,7 +553,7 @@
           item.text = message;
         });
       }
-      // wrap to intercept `message`
+      // Wrap to intercept `message`.
       if (test.pushFailure) {
         test.pushFailure = wrap(test.pushFailure, function(pushFailure, message, source, actual) {
           pushFailure.call(this, message, source, actual);
@@ -563,7 +563,7 @@
           item.text = message;
         });
       }
-      // wrap to excuse specific assertions
+      // Wrap to excuse specific assertions.
       test.finish = wrap(test.finish, function(finish) {
         var asserts = this.assertions,
             config = QUnit.config,
@@ -614,7 +614,7 @@
       });
     });
 
-    // add a callback to be triggered after a test is completed
+    // Add a callback to be triggered after a test is completed.
     QUnit.testDone(function(details) {
       var config = QUnit.config,
           data = config.extrasData,
@@ -670,7 +670,7 @@
       }
     });
 
-    // add a callback to be triggered when all testing has completed
+    // Add a callback to be triggered when all testing has completed.
     QUnit.done(function(details) {
       var failures = details.failed,
           statusColor = failures ? 'magenta' : 'green';
@@ -682,7 +682,7 @@
         console.log(color(statusColor, '    Finished in ' + details.runtime + ' milliseconds.'));
         console.log(hr);
       }
-      // exit out of Node.js or PhantomJS
+      // Exit out of Node.js or PhantomJS.
       try {
         if (failures) {
           process.exit(1);
@@ -691,7 +691,7 @@
         }
       } catch(e) {}
 
-      // exit out of Narwhal, Rhino, or RingoJS
+      // Exit out of Narwhal, Rhino, or RingoJS.
       try {
         if (failures) {
           java.lang.System.exit(1);
@@ -700,21 +700,21 @@
         }
       } catch(e) {}
 
-      // assign results to `global_test_results` for Sauce Labs
+      // Assign results to `global_test_results` for Sauce Labs.
       details.tests = QUnit.config.extrasData.sauce.tests;
       context.global_test_results = details;
     });
 
     /*------------------------------------------------------------------------*/
 
-    // replace poisoned `raises` method
+    // Replace poisoned `raises` method.
     context.raises = QUnit.raises = QUnit['throws'] || QUnit.raises;
 
-    // add CLI extras
+    // Add CLI extras.
     if (!document) {
       // Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
-      // https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
-      // http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout
+      // See https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
+      // and http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout.
       try {
         var counter = 0,
             ids = {},
@@ -740,26 +740,26 @@
         }());
       } catch(e) {}
 
-      // expose QUnit API on `context`
-      // exclude `module` because some environments have it as a built-in object
+      // Expose QUnit API on `context`.
+      // Exclude `module` because some environments have it as a built-in object.
       ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notStrictEqual ' +
        'ok raises same start stop strictEqual test throws').replace(/\S+/g, function(methodName) {
         context[methodName] = QUnit[methodName];
       });
 
-      // add `console.log` support to Narwhal, Rhino, and RingoJS
+      // Add `console.log` support to Narwhal, Rhino, and RingoJS.
       if (!console) {
         console = context.console = { 'log': function() {} };
       }
-      // RingoJS removes ANSI escape codes in `console.log`, but not in `print`
+      // RingoJS removes ANSI escape codes in `console.log`, but not in `print`.
       if (java && typeof print == 'function') {
         console.log = print;
       }
-      // start log throbber
+      // Start log throbber.
       if (!isSilent) {
         context.setInterval(logThrobber, throbberDelay);
       }
-      // must call `QUnit.start` in the test file if not loaded in a browser
+      // Must call `QUnit.start` in the test file if not loaded in a browser.
       QUnit.config.autostart = false;
       QUnit.init();
     }
@@ -767,7 +767,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // export QUnit Extras
+  // Export QUnit Extras.
   if (freeExports) {
     freeExports.runInContext = runInContext;
   } else {
