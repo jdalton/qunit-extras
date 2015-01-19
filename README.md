@@ -78,4 +78,4 @@ Extends QUnit with extra features and CLI support.
 
 ## Support
 
-Tested in Node.js 0.8.26~0.10.35, PhantomJS 1.9.8, RingoJS 0.11, & Rhino 1.7RC5.
+Tested in Node.js 0.8.28 & 0.10.35, PhantomJS 1.9.8, RingoJS 0.11, & Rhino 1.7RC5.
