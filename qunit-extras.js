@@ -238,13 +238,16 @@
      * @returns {number} The ID of the timeout.
      */
     function schedule(fn, delay, args, repeated) {
+      var wrapper = function() {
+        fn.apply(context, args);
+      };
+
       // Rhino 1.7RC4 will error assigning `task` below.
       // See https://bugzilla.mozilla.org/show_bug.cgi?id=775566.
-      var task = ids[++counter] = new JavaAdapter(java.util.TimerTask, {
-        'run': function() {
-          fn.apply(context, args);
-        }
-      });
+      var task = ids[++counter] = root.JavaAdapter
+        ? new JavaAdapter(java.util.TimerTask, { 'run': wrapper })
+        : new java.util.TimerTask(wrapper);
+
       // Support non-functions.
       if (typeof fn != 'function') {
         fn = (function(code) {
@@ -720,6 +723,14 @@
 
     // Add CLI extras.
     if (!document) {
+      // Add `console.log` support to Narwhal, Rhino, and RingoJS.
+      if (!console) {
+        console = context.console = { 'log': function() {} };
+      }
+      // RingoJS removes ANSI escape codes in `console.log`, but not in `print`.
+      if (java && typeof print == 'function') {
+        console.log = print;
+      }
       // Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
       // See https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
       // and http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout.
@@ -755,16 +766,8 @@
         context[methodName] = QUnit[methodName];
       });
 
-      // Add `console.log` support to Narwhal, Rhino, and RingoJS.
-      if (!console) {
-        console = context.console = { 'log': function() {} };
-      }
-      // RingoJS removes ANSI escape codes in `console.log`, but not in `print`.
-      if (java && typeof print == 'function') {
-        console.log = print;
-      }
       // Start log throbber.
-      if (!isSilent) {
+      if (!(isSilent || java)) {
         context.setInterval(logThrobber, throbberDelay);
       }
       // Must call `QUnit.start` in the test file if not loaded in a browser.
