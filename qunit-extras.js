@@ -702,7 +702,7 @@
         }
       } catch(e) {}
 
-      // Exit out of Narwhal, Rhino, or RingoJS.
+      // Exit out of Rhino or RingoJS.
       try {
         if (failures) {
           java.lang.System.exit(1);
@@ -723,7 +723,7 @@
 
     // Add CLI extras.
     if (!document) {
-      // Add `console.log` support to Narwhal, Rhino, and RingoJS.
+      // Add `console.log` support to Rhino, and RingoJS.
       if (!console) {
         console = context.console = { 'log': function() {} };
       }
