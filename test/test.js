@@ -13,7 +13,7 @@
 
   /** Load QUnit in a way to workaround cross-environment issues. */
   var QUnit = root.QUnit || (root.QUnit = (
-    QUnit = load('../node_modules/qunitjs/qunit/qunit.js') || root.QUnit,
+    QUnit = load('qunitjs') || root.QUnit,
     QUnit = QUnit.QUnit || QUnit
   ));
 
