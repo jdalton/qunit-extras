@@ -1,5 +1,5 @@
 /*!
- * QUnit Extras v1.4.2
+ * QUnit Extras v1.4.3
  * Copyright 2011-2015 John-David Dalton <http://allyoucanleet.com/>
  * Based on a gist by Jörn Zaefferer <https://gist.github.com/722381>
  * Available under MIT license <http://mths.be/mit>
