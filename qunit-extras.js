@@ -17,6 +17,7 @@
 
   /** Native method shortcut. */
   var push = arrayProto.push,
+      slice = arrayProto.slice,
       unshift = arrayProto.unshift;
 
   /** Used to match HTML entities. */
@@ -488,7 +489,7 @@
     // Wrap old API to intercept `expected` and `message`.
     if (QUnit.push) {
       QUnit.push = wrap(QUnit.push, function(push, result, actual, expected, message) {
-        push.call(this, result, actual, expected, message);
+        push.apply(this, slice.call(arguments, 1));
 
         var asserts = QUnit.config.current.assertions,
             item = asserts[asserts.length - 1];
@@ -499,8 +500,8 @@
     }
     // Wrap old API to intercept `message`.
     if (QUnit.pushFailure) {
-      QUnit.pushFailure = wrap(QUnit.pushFailure, function(pushFailure, message, source, actual) {
-        pushFailure.call(this, message, source, actual);
+      QUnit.pushFailure = wrap(QUnit.pushFailure, function(pushFailure, message) {
+        pushFailure.apply(this, slice.call(arguments, 1));
 
         var asserts = QUnit.config.current.assertions,
             item = asserts[asserts.length - 1];
@@ -513,7 +514,7 @@
     if (QUnit.assert.async) {
       QUnit.assert.async = wrap(QUnit.assert.async, function(async) {
         this.test.usesAsync = true;
-        return async.call(this);
+        return async.apply(this, slice.call(arguments, 1));
       });
     }
     // Add a callback to be triggered at the start of every test.
@@ -552,7 +553,7 @@
               }
             }
           }
-          finish.call(this);
+          finish.apply(this, slice.call(arguments, 1));
         });
       }
       // Exit early when there is nothing to excuse.
@@ -569,7 +570,7 @@
       // Wrap to intercept `expected` and `message`.
       if (test.push) {
         test.push = wrap(test.push, function(push, result, actual, expected, message) {
-          push.call(this, result, actual, expected, message);
+          push.apply(this, slice.call(arguments, 1));
 
           var item = this.assertions[this.assertions.length - 1];
           item.expected = QUnit.jsDump.parse(expected);
@@ -578,8 +579,8 @@
       }
       // Wrap to intercept `message`.
       if (test.pushFailure) {
-        test.pushFailure = wrap(test.pushFailure, function(pushFailure, message, source, actual) {
-          pushFailure.call(this, message, source, actual);
+        test.pushFailure = wrap(test.pushFailure, function(pushFailure, message) {
+          pushFailure.apply(this, slice.call(arguments, 1));
 
           var item = this.assertions[this.assertions.length - 1];
           item.expected = '';
@@ -633,7 +634,7 @@
             }
           }
         }
-        finish.call(this);
+        finish.apply(this, slice.call(arguments, 1));
       });
     });
 
@@ -749,7 +750,6 @@
       try {
         var counter = 0,
             ids = {},
-            slice = Array.prototype.slice,
             timer = new java.util.Timer;
 
         (function() {
