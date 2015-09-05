@@ -458,6 +458,18 @@
       };
     }());
 
+    /**
+     * Converts a number into a string.
+     *
+     * **Note:** This prevents a JIT bug in Safari 9.
+     *
+     * @memberOf QUnit
+     * @type Function
+     * @param {number} number The number to stringify.
+     * @returns {string} The result string.
+     */
+    QUnit.jsDump.parsers.number = String;
+
     /*------------------------------------------------------------------------*/
 
     // Add a callback to be triggered after every assertion.
