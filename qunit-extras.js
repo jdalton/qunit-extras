@@ -782,9 +782,11 @@
       if (!(isSilent || java)) {
         context.setInterval(logThrobber, throbberDelay);
       }
-      // Must call `QUnit.start` in the test file if not loaded in a browser.
-      QUnit.config.autostart = false;
-      QUnit.init();
+      if (QUnit.init) {
+        // Must call `QUnit.start` in the test file if not loaded in a browser.
+        QUnit.config.autostart = false;
+        QUnit.init();
+      }
     }
   }
 
