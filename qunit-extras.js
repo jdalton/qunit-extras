@@ -775,7 +775,10 @@
       // Exclude `module` because some environments have it as a built-in object.
       ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notStrictEqual ' +
        'ok raises same start stop strictEqual test throws').replace(/\S+/g, function(methodName) {
-        context[methodName] = QUnit[methodName];
+        var func = QUnit[methodName];
+        if (func) {
+          context[methodName] = func;
+        }
       });
 
       // Start log throbber.
