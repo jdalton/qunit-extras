@@ -732,8 +732,12 @@
     /*------------------------------------------------------------------------*/
 
     // Replace poisoned `raises` method.
-    context.raises = QUnit.raises = QUnit['throws'] || QUnit.raises;
-
+    if (QUnit['throws']) {
+      QUnit.raises = QUnit['throws'];
+    }
+    if (QUnit.assert) {
+      QUnit.assert.raises = QUnit.assert['throws'];
+    }
     // Add CLI extras.
     if (!document) {
       // Add `console.log` support to Rhino, and RingoJS.
