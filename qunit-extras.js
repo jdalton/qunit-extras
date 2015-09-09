@@ -773,8 +773,9 @@
 
       // Expose QUnit API on `context`.
       // Exclude `module` because some environments have it as a built-in object.
-      ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notStrictEqual ' +
-       'ok raises same start stop strictEqual test throws').replace(/\S+/g, function(methodName) {
+      ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notOk ' +
+       'notPropEqual notStrictEqual ok propEqual raises same start stop ' +
+       'strictEqual test throws').replace(/\S+/g, function(methodName) {
         var func = QUnit[methodName];
         if (func) {
           context[methodName] = func;
