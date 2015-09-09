@@ -27,18 +27,18 @@
 
   QUnit.module('qunit-extras');
 
-  QUnit.test('Some test with a title', 4, function() {
-    strictEqual(1, 1, 'foo');
-    strictEqual(2, 2, 'bar');
-    strictEqual('a', 'a', 'baz');
-    strictEqual('b', 'b', 'qux');
+  QUnit.test('Some test with a title', 4, function(assert) {
+    assert.strictEqual(1, 1, 'foo');
+    assert.strictEqual(2, 2, 'bar');
+    assert.strictEqual('a', 'a', 'baz');
+    assert.strictEqual('b', 'b', 'qux');
   });
 
-  QUnit.test('Some other test with a title', 4, function() {
-    strictEqual(1, 2, 'foo');
-    strictEqual(2, 2, 'bar');
-    strictEqual('a', 'a', 'baz');
-    strictEqual('b', 'b', 'qux');
+  QUnit.test('Some other test with a title', 4, function(assert) {
+    assert.strictEqual(1, 2, 'foo');
+    assert.strictEqual(2, 2, 'bar');
+    assert.strictEqual('a', 'a', 'baz');
+    assert.strictEqual('b', 'b', 'qux');
   });
 
   /*--------------------------------------------------------------------------*/
