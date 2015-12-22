@@ -1,4 +1,4 @@
-# QUnit Extras v1.4.4
+# QUnit Extras v1.4.5
 
 Extends QUnit with extra features and CLI support.
 
