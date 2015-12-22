@@ -604,7 +604,7 @@
             items.push('Expected at least one assertion, but none were run - call expect(0) to accept zero assertions.');
           }
         } else if (expected != length) {
-          items.push('Expected ' + expected + ' assertions, but ' + length + ' were run');
+          items.push('Expected ' + String(expected) + ' assertions, but ' + length + ' were run');
         }
         var index = -1;
         length = items.length;
@@ -683,7 +683,7 @@
         ];
 
         if (!result && type == 'EQ') {
-          message.push(color('magenta', 'Expected: ' + expected + ', Actual: ' + entry.actual));
+          message.push(color('magenta', 'Expected: ' + String(expected) + ', Actual: ' + String(entry.actual)));
         }
         if (!isSilent) {
           console.log('    ' + message.join(' | '));
