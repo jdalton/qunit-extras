@@ -14,7 +14,7 @@
   "repository": "jdalton/qunit-extras",
   "scripts": { "test": "node test/test.js" },
   "devDependencies": {
-    "qunitjs": "~1.20.0"
+    "qunitjs": "~1.22.0"
   },
   "files": [
     "qunit-extras.js"
