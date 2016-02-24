@@ -335,6 +335,20 @@
     /*------------------------------------------------------------------------*/
 
     /**
+     * Adds text color to the terminal output of `string`.
+     *
+     * @private
+     * @param {string} colorName The name of the color to add.
+     * @param {string} string The string to add colors to.
+     * @returns {string} Returns the colored string.
+     */
+    function color(colorName, string) {
+      return isAnsiSupported
+        ? ('\x1B[' + ansiCodes[colorName] + 'm' + string + '\x1B[0m')
+        : string;
+    }
+
+    /**
      * Gets the environment variable value by a given name.
      *
      * @private
@@ -356,17 +370,15 @@
     }
 
     /**
-     * Adds text color to the terminal output of `string`.
+     * Gets the last element of `array`.
      *
      * @private
-     * @param {string} colorName The name of the color to add.
-     * @param {string} string The string to add colors to.
-     * @returns {string} Returns the colored string.
+     * @param {Array} array The array to query.
+     * @returns {*} Returns the last element of `array`.
      */
-    function color(colorName, string) {
-      return isAnsiSupported
-        ? ('\x1B[' + ansiCodes[colorName] + 'm' + string + '\x1B[0m')
-        : string;
+    function last(array) {
+      var length = array ? array.length : 0;
+      return length ? array[length - 1] : undefined;
     }
 
     /**
