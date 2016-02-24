@@ -131,7 +131,7 @@
    */
   function isObject(value) {
     var type = typeof value;
-    return type == 'function' || (value && type == 'object') || false;
+    return !!value && (type == 'object' || type == 'function');
   }
 
   /**
