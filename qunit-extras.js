@@ -523,26 +523,31 @@
       module.printed = false;
     });
 
-    // Wrap old API to intercept `expected` and `message`.
+    // Wrap to intercept `expected` and `message`.
     if (QUnit.push) {
       QUnit.push = wrap(QUnit.push, function(push, result, actual, expected, message) {
         push.apply(this, slice.call(arguments, 1));
 
-        var asserts = QUnit.config.current.assertions,
-            item = asserts[asserts.length - 1];
-
+        var item = last(QUnit.config.current.assertions);
         item.expected = QUnit.jsDump.parse(expected);
         item.text = message;
       });
     }
-    // Wrap old API to intercept `message`.
+    if (QUnit.pushResult) {
+      QUnit.pushResult = wrap(QUnit.pushResult, function(pushResult, details) {
+        pushResult.apply(this, slice.call(arguments, 1));
+
+        var item = last(QUnit.config.current.assertions);
+        item.expected = QUnit.jsDump.parse(details.expected);
+        item.text = details.message;
+      });
+    }
+    // Wrap to intercept `message`.
     if (QUnit.pushFailure) {
       QUnit.pushFailure = wrap(QUnit.pushFailure, function(pushFailure, message) {
         pushFailure.apply(this, slice.call(arguments, 1));
 
-        var asserts = QUnit.config.current.assertions,
-            item = asserts[asserts.length - 1];
-
+        var item = last(QUnit.config.current.assertions);
         item.expected = '';
         item.text = message;
       });
@@ -609,9 +614,18 @@
         test.push = wrap(test.push, function(push, result, actual, expected, message) {
           push.apply(this, slice.call(arguments, 1));
 
-          var item = this.assertions[this.assertions.length - 1];
+          var item = last(this.assertions);
           item.expected = QUnit.jsDump.parse(expected);
           item.text = message;
+        });
+      }
+      if (test.pushResult) {
+        test.pushResult = wrap(test.pushResult, function(pushResult, details) {
+          pushResult.apply(this, slice.call(arguments, 1));
+
+          var item = last(this.assertions);
+          item.expected = QUnit.jsDump.parse(details.expected);
+          item.text = details.message;
         });
       }
       // Wrap to intercept `message`.
@@ -619,7 +633,7 @@
         test.pushFailure = wrap(test.pushFailure, function(pushFailure, message) {
           pushFailure.apply(this, slice.call(arguments, 1));
 
-          var item = this.assertions[this.assertions.length - 1];
+          var item = last(this.assertions);
           item.expected = '';
           item.text = message;
         });
@@ -650,8 +664,11 @@
           var assert = items[index],
               isStr = typeof assert == 'string';
 
-          var assertMessage = isStr ? assert : assert.text || unescape(result(reMessage.exec(assert.message), 1)),
-              assertValue = isStr ? assert : assert.expected,
+          var assertMessage = isStr
+            ? assert
+            : ('text' in assert ? assert.text : unescape(result(reMessage.exec(assert.message), 1)));
+
+          var assertValue = isStr ? assert : assert.expected,
               assertDied = result(reDied.exec(assertMessage), 0);
 
           if ((assertMessage && contains(excusedAsserts, assertMessage)) ||
