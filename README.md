@@ -56,7 +56,6 @@ Extends QUnit with extra features and CLI support.
     }
   };
 
-  // Call `QUnit.module()` instead of `module()` when in a CLI.
   QUnit.module('some test module');
 
   QUnit.test('some test', function() {
