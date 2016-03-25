@@ -12,9 +12,11 @@
     "Mathias Bynens <mathias@qiwi.be> (https://mathiasbynens.be/)"
   ],
   "repository": "jdalton/qunit-extras",
-  "scripts": { "test": "node test/test.js" },
+  "scripts": {
+    "test": "node test/test.js"
+  },
   "devDependencies": {
-    "qunitjs": "~1.22.0"
+    "qunitjs": "~1.23.0"
   },
   "files": [
     "qunit-extras.js"
