@@ -16,7 +16,7 @@
     "test": "node test/test.js"
   },
   "devDependencies": {
-    "qunitjs": "~1.23.0"
+    "qunitjs": "~1.23.1"
   },
   "files": [
     "qunit-extras.js"
