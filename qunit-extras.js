@@ -109,7 +109,7 @@
    * @param {*} value The value to check for.
    * @returns {boolean} Returns `true` if the `value` is found, else `false`.
    */
-  function contains(array, value) {
+  function includes(array, value) {
     var index = -1,
         length = array ? array.length : 0;
 
@@ -211,28 +211,18 @@
   function runInContext(context) {
     context || (context = root);
 
-    /** Object references. */
     var phantom = context.phantom,
         define = context.define,
         document = !phantom && context.document,
         process = phantom || context.process,
         amd = define && define.amd,
-        console = context.console,
-        java = !document && context.java,
-        print = context.print,
+        QUnit = context.QUnit,
         require = context.require;
 
-    /** Detects if running on Node.js. */
-    var isNode = isObject(process) && typeof process.on == 'function';
-
-    /** Detects if running in a PhantomJS web page. */
-    var isPhantomPage = typeof context.callPhantom == 'function';
-
-    /** Detects if QUnit Extras should log to the console. */
-    var isSilent = document && !isPhantomPage;
-
-    /** Used to indicate if running in Windows. */
-    var isWindows = isNode && process.platform == 'win32';
+    var isNode = isObject(process) && typeof process.on == 'function',
+        isPhantomPage = typeof context.callPhantom == 'function',
+        isSilent = document && !isPhantomPage,
+        isWindows = isNode && process.platform == 'win32';
 
     /** Used to indicate if ANSI escape codes are supported. */
     var isAnsiSupported = (function() {
@@ -248,90 +238,6 @@
     /** Used to display the wait throbber. */
     var throbberDelay = 500,
         waitCount = -1;
-
-    /** Shorten `context.QUnit.QUnit` to `context.QUnit`. */
-    var QUnit = context.QUnit = context.QUnit.QUnit || context.QUnit;
-
-    /*------------------------------------------------------------------------*/
-
-    /**
-     * Schedules timer-based callbacks.
-     *
-     * @private
-     * @param {Function|string} fn The function to call.
-     * @param {number} delay The number of milliseconds to delay the `fn` call.
-     * @param {Array} args Arguments to invoke `fn` with.
-     * @param {boolean} repeated A flag to specify whether `fn` is called repeatedly.
-     * @returns {number} The ID of the timeout.
-     */
-    function schedule(fn, delay, args, repeated) {
-      var wrapper = function() {
-        fn.apply(context, args);
-      };
-
-      // Rhino 1.7RC4 will error assigning `task` below.
-      // See https://bugzilla.mozilla.org/show_bug.cgi?id=775566.
-      var task = ids[++counter] = root.JavaAdapter
-        ? new JavaAdapter(java.util.TimerTask, { 'run': wrapper })
-        : new java.util.TimerTask(wrapper);
-
-      // Support non-functions.
-      if (typeof fn != 'function') {
-        fn = (function(code) {
-          code = String(code);
-          return function() { eval(code); };
-        }(fn));
-      }
-      // Used by `setInterval`.
-      if (repeated) {
-        timer.schedule(task, delay, delay);
-      }
-      // Used by `setTimeout`.
-      else {
-        timer.schedule(task, delay);
-      }
-      return counter;
-    }
-
-    /**
-     * Clears the delay set by `setInterval` or `setTimeout`.
-     *
-     * @memberOf context
-     * @param {number} id The ID of the timeout to be cleared.
-     */
-    function clearTimer(id) {
-      if (ids[id]) {
-        ids[id].cancel();
-        timer.purge();
-        delete ids[id];
-      }
-    }
-
-    /**
-     * Executes a code snippet or function repeatedly, with a delay between each call.
-     *
-     * @memberOf context
-     * @param {Function|string} fn The function to call or string to evaluate.
-     * @param {number} delay The number of milliseconds to delay each `fn` call.
-     * @param {...*} [args] Arguments to invoke `fn` with.
-     * @returns {number} The ID of the timeout.
-     */
-    function setInterval(fn, delay) {
-      return schedule(fn, delay, slice.call(arguments, 2), true);
-    }
-
-    /**
-     * Executes a code snippet or a function after specified delay.
-     *
-     * @memberOf context
-     * @param {Function|string} fn The function to call or string to evaluate.
-     * @param {number} delay The number of milliseconds to delay the `fn` call.
-     * @param {...*} [args] Arguments to invoke `fn` with.
-     * @returns {number} The ID of the timeout.
-     */
-    function setTimeout(fn, delay) {
-      return schedule(fn, delay, slice.call(arguments, 2));
-    }
 
     /*------------------------------------------------------------------------*/
 
@@ -360,10 +266,7 @@
       if (isNode) {
         return process.env[name];
       }
-      if (java) {
-        return java.lang.System.getenv(name);
-      }
-      if (!amd && typeof require == 'function') {
+      if (!amd) {
         try {
           return require('system').env[name];
         } catch(e) {}
@@ -672,11 +575,11 @@
           var assertValue = isStr ? assert : assert.expected,
               assertDied = result(reDied.exec(assertMessage), 0);
 
-          if ((assertMessage && contains(excusedAsserts, assertMessage)) ||
-              (assertDied && contains(excusedAsserts, assertDied)) ||
+          if ((assertMessage && includes(excusedAsserts, assertMessage)) ||
+              (assertDied && includes(excusedAsserts, assertDied)) ||
               (assertValue && (
-                contains(excusedAsserts, assertValue) ||
-                contains(excusedAsserts, assertValue.replace(/\s+/g, ''))
+                includes(excusedAsserts, assertValue) ||
+                includes(excusedAsserts, assertValue.replace(/\s+/g, ''))
               ))) {
             if (isStr) {
               while (asserts.length < expected) {
@@ -770,15 +673,6 @@
         }
       } catch(e) {}
 
-      // Exit out of Rhino or RingoJS.
-      try {
-        if (failures) {
-          java.lang.System.exit(1);
-        } else {
-          quit();
-        }
-      } catch(e) {}
-
       // Assign results to `global_test_results` for Sauce Labs.
       details.tests = QUnit.config.extrasData.sauce.tests;
       context.global_test_results = details;
@@ -795,54 +689,8 @@
     }
     // Add CLI extras.
     if (!document) {
-      // Add `console.log` support to Rhino, and RingoJS.
-      if (!console) {
-        console = context.console = { 'log': function() {} };
-      }
-      // RingoJS removes ANSI escape codes in `console.log`, but not in `print`.
-      if (java && typeof print == 'function') {
-        console.log = print;
-      }
-      // Timeout fallbacks based on the work of Andrea Giammarchi and Weston C.
-      // See https://github.com/WebReflection/wru/blob/master/src/rhinoTimers.js
-      // and http://stackoverflow.com/questions/2261705/how-to-run-a-javascript-function-asynchronously-without-using-settimeout.
-      try {
-        var counter = 0,
-            ids = {},
-            timer = new java.util.Timer;
-
-        (function() {
-          var getDescriptor = Object.getOwnPropertyDescriptor || function() {
-            return { 'writable': true };
-          };
-
-          var descriptor;
-          if ((!context.clearInterval || ((descriptor = getDescriptor(context, 'clearInterval')) && (descriptor.writable || descriptor.set))) &&
-              (!context.setInterval   || ((descriptor = getDescriptor(context, 'setInterval'))   && (descriptor.writable || descriptor.set)))) {
-            context.clearInterval = clearTimer;
-            context.setInterval = setInterval;
-          }
-          if ((!context.clearTimeout || ((descriptor = getDescriptor(context, 'clearTimeout')) && (descriptor.writable || descriptor.set))) &&
-              (!context.setTimeout   || ((descriptor = getDescriptor(context, 'setTimeout'))   && (descriptor.writable || descriptor.set)))) {
-            context.clearTimeout = clearTimer;
-            context.setTimeout = setTimeout;
-          }
-        }());
-      } catch(e) {}
-
-      // Expose QUnit API on `context`.
-      // Exclude `module` because some environments have it as a built-in object.
-      ('asyncTest deepEqual equal equals expect notDeepEqual notEqual notOk ' +
-       'notPropEqual notStrictEqual ok propEqual raises same start stop ' +
-       'strictEqual test throws').replace(/\S+/g, function(methodName) {
-        var func = QUnit[methodName];
-        if (func) {
-          context[methodName] = func;
-        }
-      });
-
       // Start log throbber.
-      if (!(isSilent || java)) {
+      if (!isSilent) {
         context.setInterval(logThrobber, throbberDelay);
       }
       if (QUnit.init) {
