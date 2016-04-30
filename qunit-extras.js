@@ -17,28 +17,6 @@
       slice = arrayProto.slice,
       unshift = arrayProto.unshift;
 
-  /** Detect environment objects. */
-  var phantom = root.phantom ,
-      document = !phantom && root.document,
-      process = phantom || root.process;
-
-  /** Detect environment flags. */
-  var isNode = isObject(process) && typeof process.on == 'function',
-      isPhantomPage = typeof root.callPhantom == 'function',
-      isSilent = document && !isPhantomPage,
-      isWindows = isNode && process.platform == 'win32';
-
-  /** Detect if ANSI escape codes are supported. */
-  var isAnsiSupported = (function() {
-    if (isNode && process.stdout && !process.stdout.isTTY) {
-      return false;
-    }
-    if (isWindows || getEnv('COLORTERM')) {
-      return true;
-    }
-    return /^(?:ansi|cygwin|linux|screen|xterm|vt100)$|color/i.test(getEnv('TERM'));
-  }());
-
   /** Used as a horizontal rule in console output. */
   var hr = '----------------------------------------';
 
@@ -112,6 +90,28 @@
   var root = freeGlobal ||
     ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) ||
       freeSelf || thisGlobal || Function('return this')();
+
+  /** Detect environment objects. */
+  var phantom = root.phantom ,
+      document = !phantom && root.document,
+      process = phantom || root.process;
+
+  /** Detect environment flags. */
+  var isNode = isObject(process) && typeof process.on == 'function',
+      isPhantomPage = typeof root.callPhantom == 'function',
+      isSilent = document && !isPhantomPage,
+      isWindows = isNode && process.platform == 'win32';
+
+  /** Detect if ANSI escape codes are supported. */
+  var isAnsiSupported = (function() {
+    if (isNode && process.stdout && !process.stdout.isTTY) {
+      return false;
+    }
+    if (isWindows || getEnv('COLORTERM')) {
+      return true;
+    }
+    return /^(?:ansi|cygwin|linux|screen|xterm|vt100)$|color/i.test(getEnv('TERM'));
+  }());
 
   /*--------------------------------------------------------------------------*/
 
