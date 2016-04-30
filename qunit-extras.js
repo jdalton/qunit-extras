@@ -141,6 +141,22 @@
   }
 
   /**
+   * Gets the environment variable value by a given name.
+   *
+   * @private
+   * @param {string} name The name of the environment variable to get.
+   * @returns {*} Returns the environment variable value.
+   */
+  function getEnv(name) {
+    if (isNode) {
+      return process.env[name];
+    }
+    if (phantom) {
+      return require('system').env[name];
+    }
+  }
+
+  /**
    * Checks if a given value is present in an array using strict equality
    * for comparisons, i.e. `===`.
    *
@@ -159,22 +175,6 @@
       }
     }
     return false;
-  }
-
-  /**
-   * Gets the environment variable value by a given name.
-   *
-   * @private
-   * @param {string} name The name of the environment variable to get.
-   * @returns {*} Returns the environment variable value.
-   */
-  function getEnv(name) {
-    if (isNode) {
-      return process.env[name];
-    }
-    if (phantom) {
-      return require('system').env[name];
-    }
   }
 
   /**
