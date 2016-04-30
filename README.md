@@ -33,7 +33,6 @@ QUnit.config.excused = {
 ## Footnotes
 
   1. QUnit v1.3.0 and v1.12.0-v1.15.0 are not fully supported by QUnit Extras CLI additions
-  2. Rhino v1.7RC4 does not support timeout fallbacks `clearTimeout` and `setTimeout`
 
 ## Support
 
