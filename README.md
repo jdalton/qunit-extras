@@ -77,4 +77,4 @@ Extends QUnit with extra features and CLI support.
 
 ## Support
 
-Tested in Node.js 0.10, 0.12, 4, & 5.
+Tested in Node.js 0.10-6.
