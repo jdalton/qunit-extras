@@ -5,69 +5,33 @@ Extends QUnit with extra features and CLI support.
 ## Usage
 
 ```js
-;(function() {
+// Load QUnit and Extras.
+var QUnit = require('qunit');
+var QUnitExtras = require('qunit-extras');
 
-  // Used as reference to the global object.
-  var root = (typeof global == 'object' && global) || this;
+// Hook into QUnit.
+QUnitExtras.runInContext({ 'QUnit': QUnit });
 
-  // Used as a no-op function.
-  var noop = Function.prototype;
+// Set the number of retries an async tests may attempt.
+QUnit.config.asyncRetries = 10;
 
-  // Use a single "load" function.
-  var load = (typeof require == 'function' && !(root.define && define.amd))
-    ? require
-    : (!root.document && root.java && root.load) || noop;
-
-  // Load QUnit in a way to workaround cross-environment issues.
-  var QUnit = root.QUnit || (root.QUnit = (
-    root.addEventListener || (root.addEventListener = noop),
-    root.setTimeout || (root.setTimeout = noop),
-    QUnit = load('path/to/qunit.js') || root.QUnit,
-    addEventListener === noop && delete root.addEventListener,
-    QUnit = QUnit.QUnit || QUnit
-  ));
-
-  // Load QUnit Extras.
-  var qe = load('path/to/qunit-extras.js');
-  if (qe) {
-    qe.runInContext(root);
+// Excuse tests.
+QUnit.config.excused = {
+  // Specify the module name.
+  'qunit module': {
+    // Excuse individual asserts in a test.
+    'a qunit test': [
+      // Excuse by assert message.
+      'assert message',
+      // Excuse by expected result.
+      '[1,2,3]',
+      // Excuse by error indicator.
+      'Died on test #1',
+    ],
+    // Excuse an entire test.
+    'another qunit test': true
   }
-
-  // Set the number of retries an async tests may attempt.
-  QUnit.config.asyncRetries = 10;
-
-  // Excuse tests.
-  QUnit.config.excused = {
-    // Specify the module name.
-    'qunit module': {
-      // Excuse individual asserts in a test.
-      'a qunit test': [
-        // Excuse by assert message.
-        'assert message',
-
-        // Excuse by expected result.
-        '[1,2,3]',
-
-        // Excuse by error indicator.
-        'Died on test #1',
-      ],
-      // Excuse an entire test.
-      'another qunit test': true
-    }
-  };
-
-  QUnit.module('some test module');
-
-  QUnit.test('some test', function() {
-    // ...
-  });
-
-  // Depending on the version of `QUnit` call either `QUnit.start()` or `QUnit.load()`
-  // when in a CLI or PhantomJS.
-  if (!root.document || root.phantom) {
-    QUnit.load();
-  }
-}.call(this));
+};
 ```
 
 ## Footnotes
