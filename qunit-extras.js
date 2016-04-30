@@ -9,16 +9,42 @@
   /** Used as a safe reference for `undefined` in pre ES5 environments. */
   var undefined;
 
-  /** Used as a horizontal rule in console output. */
-  var hr = '----------------------------------------';
-
-  /** Used for native method references. */
+  /** Used for built-in method references. */
   var arrayProto = Array.prototype;
 
-  /** Native method shortcut. */
+  /** Built-in value references. */
   var push = arrayProto.push,
       slice = arrayProto.slice,
       unshift = arrayProto.unshift;
+
+  /** Detect environment objects. */
+  var phantom = root.phantom ,
+      document = !phantom && root.document,
+      process = phantom || root.process;
+
+  /** Detect environment flags. */
+  var isNode = isObject(process) && typeof process.on == 'function',
+      isPhantomPage = typeof root.callPhantom == 'function',
+      isSilent = document && !isPhantomPage,
+      isWindows = isNode && process.platform == 'win32';
+
+  /** Detect if ANSI escape codes are supported. */
+  var isAnsiSupported = (function() {
+    if (isNode && process.stdout && !process.stdout.isTTY) {
+      return false;
+    }
+    if (isWindows || getEnv('COLORTERM')) {
+      return true;
+    }
+    return /^(?:ansi|cygwin|linux|screen|xterm|vt100)$|color/i.test(getEnv('TERM'));
+  }());
+
+  /** Used as a horizontal rule in console output. */
+  var hr = '----------------------------------------';
+
+  /** Used to display the wait throbber. */
+  var throbberDelay = 500,
+      waitCount = -1;
 
   /** Used to match HTML entities. */
   var reEscapedHtml = /(&amp;|&lt;|&gt;|&quot;|&#39;)/g;
@@ -101,6 +127,20 @@
   }
 
   /**
+   * Adds text color to the terminal output of `string`.
+   *
+   * @private
+   * @param {string} colorName The name of the color to add.
+   * @param {string} string The string to add colors to.
+   * @returns {string} Returns the colored string.
+   */
+  function color(colorName, string) {
+    return isAnsiSupported
+      ? ('\x1B[' + ansiCodes[colorName] + 'm' + string + '\x1B[0m')
+      : string;
+  }
+
+  /**
    * Checks if a given value is present in an array using strict equality
    * for comparisons, i.e. `===`.
    *
@@ -122,6 +162,22 @@
   }
 
   /**
+   * Gets the environment variable value by a given name.
+   *
+   * @private
+   * @param {string} name The name of the environment variable to get.
+   * @returns {*} Returns the environment variable value.
+   */
+  function getEnv(name) {
+    if (isNode) {
+      return process.env[name];
+    }
+    if (phantom) {
+      return require('system').env[name];
+    }
+  }
+
+  /**
    * Checks if `value` is the language type of `Object`.
    * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
    *
@@ -132,6 +188,57 @@
   function isObject(value) {
     var type = typeof value;
     return !!value && (type == 'object' || type == 'function');
+  }
+
+  /**
+   * Gets the last element of `array`.
+   *
+   * @private
+   * @param {Array} array The array to query.
+   * @returns {*} Returns the last element of `array`.
+   */
+  function last(array) {
+    var length = array ? array.length : 0;
+    return length ? array[length - 1] : undefined;
+  }
+
+  /**
+   * Writes an inline message to standard output.
+   *
+   * @private
+   * @param {string} [text=''] The text to log.
+   */
+  var logInline = (function() {
+    if (!isNode || isWindows) {
+      return function() {};
+    }
+    // Cleanup any inline logs when exited via `ctrl+c`.
+    process.on('SIGINT', function() {
+      logInline();
+      process.exit();
+    });
+
+    var prevLine = '';
+    return function(text) {
+      var blankLine = repeat(' ', prevLine.length);
+      if (text == null) {
+        text = '';
+      }
+      if (text.length > hr.length) {
+        text = text.slice(0, hr.length - 3) + '...';
+      }
+      prevLine = text;
+      process.stdout.write(text + blankLine.slice(text.length) + '\r');
+    }
+  }());
+
+  /**
+   * Writes the wait throbber to standard output.
+   *
+   * @private
+   */
+  function logThrobber() {
+    logInline('Please wait' + repeat('.', (++waitCount % 3) + 1));
   }
 
   /**
@@ -203,128 +310,12 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Installs the QUnit additions on the given `context` object.
+   * Installs extras on `QUnit`.
    *
-   * @memberOf exports
-   * @param {Object} context The context object.
+   * @param {Object} QUnit The QUnit object.
+   * @returns {Object} Returns `QUnit`.
    */
-  function runInContext(context) {
-    context || (context = root);
-
-    var phantom = context.phantom,
-        define = context.define,
-        document = !phantom && context.document,
-        process = phantom || context.process,
-        amd = define && define.amd,
-        QUnit = context.QUnit,
-        require = context.require;
-
-    var isNode = isObject(process) && typeof process.on == 'function',
-        isPhantomPage = typeof context.callPhantom == 'function',
-        isSilent = document && !isPhantomPage,
-        isWindows = isNode && process.platform == 'win32';
-
-    /** Used to indicate if ANSI escape codes are supported. */
-    var isAnsiSupported = (function() {
-      if (isNode && process.stdout && !process.stdout.isTTY) {
-        return false;
-      }
-      if (isWindows || getEnv('COLORTERM')) {
-        return true;
-      }
-      return /^(?:ansi|cygwin|linux|screen|xterm|vt100)$|color/i.test(getEnv('TERM'));
-    }());
-
-    /** Used to display the wait throbber. */
-    var throbberDelay = 500,
-        waitCount = -1;
-
-    /*------------------------------------------------------------------------*/
-
-    /**
-     * Adds text color to the terminal output of `string`.
-     *
-     * @private
-     * @param {string} colorName The name of the color to add.
-     * @param {string} string The string to add colors to.
-     * @returns {string} Returns the colored string.
-     */
-    function color(colorName, string) {
-      return isAnsiSupported
-        ? ('\x1B[' + ansiCodes[colorName] + 'm' + string + '\x1B[0m')
-        : string;
-    }
-
-    /**
-     * Gets the environment variable value by a given name.
-     *
-     * @private
-     * @param {string} name The name of the environment variable to get.
-     * @returns {*} Returns the environment variable value.
-     */
-    function getEnv(name) {
-      if (isNode) {
-        return process.env[name];
-      }
-      if (!amd) {
-        try {
-          return require('system').env[name];
-        } catch(e) {}
-      }
-    }
-
-    /**
-     * Gets the last element of `array`.
-     *
-     * @private
-     * @param {Array} array The array to query.
-     * @returns {*} Returns the last element of `array`.
-     */
-    function last(array) {
-      var length = array ? array.length : 0;
-      return length ? array[length - 1] : undefined;
-    }
-
-    /**
-     * Writes an inline message to standard output.
-     *
-     * @private
-     * @param {string} [text=''] The text to log.
-     */
-    var logInline = (function() {
-      if (!isNode || isWindows) {
-        return function() {};
-      }
-      // Cleanup any inline logs when exited via `ctrl+c`.
-      process.on('SIGINT', function() {
-        logInline();
-        process.exit();
-      });
-
-      var prevLine = '';
-      return function(text) {
-        var blankLine = repeat(' ', prevLine.length);
-        if (text == null) {
-          text = '';
-        }
-        if (text.length > hr.length) {
-          text = text.slice(0, hr.length - 3) + '...';
-        }
-        prevLine = text;
-        process.stdout.write(text + blankLine.slice(text.length) + '\r');
-      }
-    }());
-
-    /**
-     * Writes the wait throbber to standard output.
-     *
-     * @private
-     */
-    function logThrobber() {
-      logInline('Please wait' + repeat('.', (++waitCount % 3) + 1));
-    }
-
-    /*------------------------------------------------------------------------*/
+  function install(QUnit) {
 
     /**
      * The number of retries async tests have to succeed.
@@ -675,7 +666,7 @@
 
       // Assign results to `global_test_results` for Sauce Labs.
       details.tests = QUnit.config.extrasData.sauce.tests;
-      context.global_test_results = details;
+      root.global_test_results = details;
     });
 
     /*------------------------------------------------------------------------*/
@@ -691,7 +682,7 @@
     if (!document) {
       // Start log throbber.
       if (!isSilent) {
-        context.setInterval(logThrobber, throbberDelay);
+        setInterval(logThrobber, throbberDelay);
       }
       if (QUnit.init) {
         // Must call `QUnit.start` in the test file if not loaded in a browser.
@@ -699,14 +690,15 @@
         QUnit.init();
       }
     }
+    return QUnit;
   }
 
   /*--------------------------------------------------------------------------*/
 
   // Export QUnit Extras.
-  if (freeExports) {
-    freeExports.runInContext = runInContext;
+  if (moduleExports) {
+    freeModule.exports = install;
   } else {
-    runInContext();
+    install(root.QUnit);
   }
 }.call(this));

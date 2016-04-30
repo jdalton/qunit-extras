@@ -5,12 +5,8 @@ Extends QUnit with extra features and CLI support.
 ## Usage
 
 ```js
-// Load QUnit and Extras.
-var QUnit = require('qunit');
-var QUnitExtras = require('qunit-extras');
-
-// Hook into QUnit.
-QUnitExtras.runInContext({ 'QUnit': QUnit });
+// Load QUnit and install extras.
+var QUnit = require('qunit-extras')(require('qunit'));
 
 // Set the number of retries an async tests may attempt.
 QUnit.config.asyncRetries = 10;
