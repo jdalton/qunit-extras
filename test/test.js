@@ -1,6 +1,6 @@
 'use strict';
 
-var QUnit = require('../qunit-extras')(require('qunitjs'));
+var QUnit = require('../qunit-extras');
 
 QUnit.module('qunit-extras');
 

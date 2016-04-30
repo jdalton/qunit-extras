@@ -697,7 +697,7 @@
 
   // Export QUnit Extras.
   if (moduleExports) {
-    freeModule.exports = install;
+    freeModule.exports = install(require('qunitjs'));
   } else {
     install(root.QUnit);
   }
