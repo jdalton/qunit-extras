@@ -209,6 +209,7 @@
    * @param {Object} context The context object.
    */
   function runInContext(context) {
+    context || (context = root);
 
     /** Object references. */
     var phantom = context.phantom,
@@ -858,6 +859,6 @@
   if (freeExports) {
     freeExports.runInContext = runInContext;
   } else {
-    runInContext(root);
+    runInContext();
   }
 }.call(this));
