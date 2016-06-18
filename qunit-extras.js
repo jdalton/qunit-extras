@@ -640,7 +640,7 @@
         } else {
           process.exit(0);
         }
-      } catch(e) {}
+      } catch (e) {}
 
       // Assign results to `global_test_results` for Sauce Labs.
       details.tests = QUnit.config.extrasData.sauce.tests;
@@ -662,11 +662,9 @@
       if (!isSilent) {
         setInterval(logThrobber, throbberDelay);
       }
-      if (QUnit.init) {
-        // Must call `QUnit.start` in the test file if not loaded in a browser.
-        QUnit.config.autostart = false;
-        QUnit.init();
-      }
+      // Must call `QUnit.start` in the test file if not loaded in a browser.
+      QUnit.config.autostart = false;
+      try { QUnit.init(); } catch (e) {}
     }
     return QUnit;
   }
