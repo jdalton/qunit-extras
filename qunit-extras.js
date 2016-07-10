@@ -409,7 +409,6 @@
       // Wrap to add `expected`.
       test.pushResult = wrap(test.pushResult, function(pushResult, details) {
         pushResult.apply(this, slice.call(arguments, 1));
-
         var assert = last(this.assertions);
         assert.expected = QUnit.dump.parse(details.expected);
       });
