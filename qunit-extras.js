@@ -135,11 +135,9 @@
    * @returns {boolean} Returns `true` if the `value` is found, else `false`.
    */
   function includes(array, value) {
-    var index = -1,
-        length = array ? array.length : 0;
-
-    while (++index < length) {
-      if (array[index] === value) {
+    var length = array ? array.length : 0;
+    while (length--) {
+      if (array[length] === value) {
         return true;
       }
     }
