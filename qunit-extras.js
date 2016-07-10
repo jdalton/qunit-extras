@@ -385,13 +385,13 @@
           var assert = items[index],
               isStr = typeof assert == 'string',
               assertMessage = isStr ? assert : assert.message,
-              assertValue = isStr ? assert : String(assert.expected),
+              assertValue = isStr ? assert : assert.expected,
               assertDied = (reDied.exec(assertMessage) || [''])[0];
 
           if (includes(excusedAsserts, assertMessage) ||
               includes(excusedAsserts, assertDied) ||
               includes(excusedAsserts, assertValue) ||
-              includes(excusedAsserts, assertValue.replace(/\s+/g, ''))) {
+              includes(excusedAsserts, String(assertValue).replace(/\s+/g, ''))) {
             if (isStr) {
               while (asserts.length < expected) {
                 asserts.push({ 'result': true });
