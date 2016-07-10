@@ -433,16 +433,16 @@
     // Add a callback to be triggered after a test is completed.
     QUnit.testDone(function(details) {
       var config = QUnit.config,
-          data = config.extrasData,
           failures = details.failed,
-          hidepassed = config.hidepassed,
-          module = data.module,
-          moduleLogs = module.logs,
-          sauceTests = data.sauce.tests;
+          hidepassed = config.hidepassed;
 
       if (hidepassed && !failures) {
         return;
       }
+      var data = config.extrasData,
+          module = data.module,
+          moduleLogs = module.logs;
+
       if (!isSilent) {
         logInline();
         if (!module.printed) {
@@ -460,12 +460,13 @@
           length = moduleLogs.length;
 
       while(++index < length) {
-        var entry = moduleLogs[index];
-        if (hidepassed && entry.result) {
+        var entry = moduleLogs[index],
+            result = entry.result;
+
+        if (hidepassed && result) {
           continue;
         }
         var expected = entry.expected,
-            result = entry.result,
             type = typeof expected != 'undefined' ? 'EQ' : 'OK';
 
         var message = [
@@ -483,8 +484,8 @@
         if (!isSilent) {
           console.log('    ' + message.join(' | '));
         }
-        if (!entry.result) {
-          sauceTests.push(entry);
+        if (!result) {
+          data.sauce.tests.push(entry);
         }
       }
     });
