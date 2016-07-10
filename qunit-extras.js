@@ -391,7 +391,7 @@
           var assert = items[index],
               isStr = typeof assert == 'string',
               assertMessage = isStr ? assert : assert.message,
-              assertValue = isStr ? assert : assert.expected,
+              assertValue = isStr ? assert : String(assert.expected),
               assertDied = (reDied.exec(assertMessage) || [''])[0];
 
           if (includes(excusedAsserts, assertMessage) ||
