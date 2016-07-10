@@ -428,7 +428,7 @@
     // Wrap to flag tests using `assert.async`.
     if (QUnit.assert.async) {
       QUnit.assert.async = wrap(QUnit.assert.async, function(async) {
-        this.test.usesAsync = true;
+        this.test.usedAsync = true;
         return async.apply(this, slice.call(arguments, 1));
       });
     }
@@ -445,7 +445,7 @@
       if (!test.retries) {
         test.retries = 0;
         test.finish = wrap(test.finish, function(finish) {
-          if (this.async || this.usesAsync) {
+          if (this.async || this.usedAsync) {
             var asserts = this.assertions,
                 config = QUnit.config,
                 index = -1,
@@ -478,7 +478,7 @@
       }
       // Excuse the entire test.
       if (excusedAsserts === true) {
-        test.async = test.usesAsync = false;
+        test.async = test.usedAsync = false;
         test.callback = function() {};
         test.expected = 0;
         return;
