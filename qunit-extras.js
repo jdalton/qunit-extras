@@ -365,7 +365,7 @@
       }
       // Excuse the entire test.
       if (excusedAsserts === true) {
-        test.async = test.usedAsync = false;
+        test.async = false;
         test.callback = function() {};
         test.expected = 0;
         return;
