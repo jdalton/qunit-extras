@@ -24,12 +24,8 @@
   var throbberDelay = 500,
       waitCount = -1;
 
-  /** Used to match HTML entities. */
-  var reEscapedHtml = /(&amp;|&lt;|&gt;|&quot;|&#39;)/g;
-
   /** Used to match parts of the assert message. */
-  var reDied = /^Died on test #\d+/,
-      reMessage = /^<span class='test-message'>([\s\S]*?)<\/span>/;
+  var reDied = /^Died on test #\d+/;
 
   /** Used to associate color names with their corresponding codes. */
   var ansiCodes = {
