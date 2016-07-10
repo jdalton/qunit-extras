@@ -307,6 +307,12 @@
       module.printed = false;
     });
 
+    // Wrap to flag tests using `assert.async`.
+    QUnit.assert.async = wrap(QUnit.assert.async, function(async) {
+      this.test.isAsync = true;
+      return async.apply(this, slice.call(arguments, 1));
+    });
+
     // Add a callback to be triggered at the start of every test.
     QUnit.testStart(function(details) {
       var config = QUnit.config,
@@ -330,7 +336,7 @@
       test.retries = 0;
       test.finish = wrap(test.finish, function(finish) {
         var args = slice.call(arguments, 1);
-        if (!this.usedAsync) {
+        if (!this.isAsync) {
           finish.apply(this, args);
           return;
         }
