@@ -460,6 +460,7 @@
                 logs.length -= asserts.length;
                 asserts.length = 0;
 
+                this.resumed = false;
                 this.retries++;
                 this.queue();
 
