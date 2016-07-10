@@ -62,7 +62,7 @@
       process = phantom || root.process;
 
   /** Detect environment flags. */
-  var isNode = isObject(process) && typeof process.on == 'function',
+  var isNode = root.process && typeof process.on == 'function',
       isPhantomPage = typeof root.callPhantom == 'function',
       isSilent = document && !isPhantomPage,
       isWindows = isNode && process.platform == 'win32';
@@ -138,19 +138,6 @@
       }
     }
     return false;
-  }
-
-  /**
-   * Checks if `value` is the language type of `Object`.
-   * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
-   *
-   * @private
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if `value` is an object, else `false`.
-   */
-  function isObject(value) {
-    var type = typeof value;
-    return !!value && (type == 'object' || type == 'function');
   }
 
   /**
