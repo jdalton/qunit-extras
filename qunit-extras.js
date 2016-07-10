@@ -183,13 +183,11 @@
 
     var prevLine = '';
     return function(text) {
-      var blankLine = repeat(' ', prevLine.length);
-      if (text == null) {
-        text = '';
-      }
+      text = text == null ? '' : text;
       if (text.length > hr.length) {
         text = text.slice(0, hr.length - 3) + '...';
       }
+      var blankLine = repeat(' ', prevLine.length);
       prevLine = text;
       process.stdout.write(text + blankLine.slice(text.length) + '\r');
     }
