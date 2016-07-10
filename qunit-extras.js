@@ -475,7 +475,10 @@
         ];
 
         if (!result && type == 'EQ') {
-          message.push(color('magenta', 'Expected: ' + String(expected) + ', Actual: ' + String(entry.actual)));
+          message.push(color('magenta',
+            'Expected: ' + (entry.negative ? 'NOT ' : '') + String(expected) + ', ' +
+            'Actual: ' + String(entry.actual)
+          ));
         }
         if (!isSilent) {
           console.log('    ' + message.join(' | '));
