@@ -30,10 +30,6 @@ QUnit.config.excused = {
 };
 ```
 
-## Footnotes
-
-  1. QUnit v1.3.0 and v1.12.0-v1.15.0 are not fully supported by QUnit Extras CLI additions
-
 ## Support
 
 Tested in Node.js 0.10-6.
