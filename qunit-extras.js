@@ -329,7 +329,7 @@
           excusedAsserts = excusedTests && excusedTests[details.name];
 
       // Allow async tests to retry.
-      if (!test.retries) {
+      if (test.retries == null) {
         test.retries = 0;
         test.finish = wrap(test.finish, function(finish) {
           if (this.usedAsync) {
