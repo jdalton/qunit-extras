@@ -409,12 +409,10 @@
               assertValue = isStr ? assert : assert.expected,
               assertDied = (reDied.exec(assertMessage) || [''])[0];
 
-          if ((assertMessage && includes(excusedAsserts, assertMessage)) ||
-              (assertDied && includes(excusedAsserts, assertDied)) ||
-              (assertValue && (
-                includes(excusedAsserts, assertValue) ||
-                includes(excusedAsserts, assertValue.replace(/\s+/g, ''))
-              ))) {
+          if (includes(excusedAsserts, assertMessage) ||
+              includes(excusedAsserts, assertDied) ||
+              includes(excusedAsserts, assertValue) ||
+              includes(excusedAsserts, assertValue.replace(/\s+/g, ''))) {
             if (isStr) {
               while (asserts.length < expected) {
                 asserts.push({ 'result': true });
