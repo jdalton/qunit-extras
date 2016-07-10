@@ -25,4 +25,6 @@ QUnit.test('Some test fail with a title', function(assert) {
 QUnit.config.asyncRetries = 10;
 QUnit.config.hidepassed = true;
 QUnit.config.noglobals = true;
+
 QUnit.load();
+QUnit.start();
