@@ -39,15 +39,6 @@
     'red': 31
   };
 
-  /** Used to convert HTML entities to characters. */
-  var htmlUnescapes = {
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&quot;': '"',
-    '&#39;': "'"
-  };
-
   /** Detect free variable `global` from Node.js. */
   var freeGlobal = checkGlobal(typeof global == 'object' && global);
 
@@ -232,41 +223,6 @@
   }
 
   /**
-   * Resolves the value of property `key` on `object`.
-   *
-   * @private
-   * @param {Object} object The object to inspect.
-   * @param {string} key The name of the property to resolve.
-   * @returns {*} Returns the resolved value.
-   */
-  function result(object, key) {
-    return object == null ? undefined : object[key];
-  }
-
-  /**
-   * Converts the HTML entities `&amp;`, `&lt;`, `&gt;`, `&quot;`, and `&#39;`
-   * in `string` to their corresponding characters.
-   *
-   * @private
-   * @param {string} string The string to unescape.
-   * @returns {string} Returns the unescaped string.
-   */
-  function unescape(string) {
-    return string == null ? '' : String(string).replace(reEscapedHtml, unescapeHtmlChar);
-  }
-
-  /**
-   * Used by `unescape` to convert HTML entities to characters.
-   *
-   * @private
-   * @param {string} match The matched character to unescape.
-   * @returns {string} Returns the unescaped character.
-   */
-  function unescapeHtmlChar(match) {
-    return htmlUnescapes[match];
-  }
-
-  /**
    * Creates a function that provides `value` to the wrapper function as its
    * first argument. Additional arguments provided to the function are appended
    * to those provided to the wrapper function. The wrapper is executed with
@@ -427,18 +383,8 @@
       test.pushResult = wrap(test.pushResult, function(pushResult, details) {
         pushResult.apply(this, slice.call(arguments, 1));
 
-        var item = last(this.assertions);
-        item.expected = QUnit.jsDump.parse(details.expected);
-        item.text = details.message;
-      });
-
-      // Wrap to intercept `message`.
-      test.pushFailure = wrap(test.pushFailure, function(pushFailure, message) {
-        pushFailure.apply(this, slice.call(arguments, 1));
-
-        var item = last(this.assertions);
-        item.expected = '';
-        item.text = message;
+        var assert = last(this.assertions);
+        assert.expected = QUnit.jsDump.parse(details.expected);
       });
 
       // Wrap to excuse specific assertions.
@@ -465,14 +411,10 @@
 
         while (++index < length) {
           var assert = items[index],
-              isStr = typeof assert == 'string';
-
-          var assertMessage = isStr
-            ? assert
-            : ('text' in assert ? assert.text : unescape(result(reMessage.exec(assert.message), 1)));
-
-          var assertValue = isStr ? assert : assert.expected,
-              assertDied = result(reDied.exec(assertMessage), 0);
+              isStr = typeof assert == 'string',
+              assertMessage = isStr ? assert : assert.message,
+              assertValue = isStr ? assert : assert.expected,
+              assertDied = (reDied.exec(assertMessage) || [''])[0];
 
           if ((assertMessage && includes(excusedAsserts, assertMessage)) ||
               (assertDied && includes(excusedAsserts, assertDied)) ||
