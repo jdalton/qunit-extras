@@ -346,30 +346,6 @@
     };
 
     /**
-     * Converts an object into a string representation.
-     *
-     * @memberOf QUnit
-     * @type Function
-     * @param {Object} object The object to stringify.
-     * @returns {string} The result string.
-     */
-    QUnit.jsDump.parsers.object = (function() {
-      var func = QUnit.jsDump.parsers.object;
-      if (isSilent) {
-        return func;
-      }
-      return function(object) {
-        if (typeof object.rhinoException != 'object') {
-          return func(object);
-        }
-        return object.name +
-          ' { message: "' + object.message +
-          '", fileName: "' + object.fileName +
-          '", lineNumber: ' + object.lineNumber + ' }';
-      };
-    }());
-
-    /**
      * Converts a number into a string.
      *
      * **Note:** This prevents a JIT bug in Safari 9.
@@ -379,7 +355,7 @@
      * @param {number} number The number to stringify.
      * @returns {string} The result string.
      */
-    QUnit.jsDump.parsers.number = String;
+    QUnit.dump.parsers.number = String;
 
     /*------------------------------------------------------------------------*/
 
@@ -396,42 +372,6 @@
       module.printed = false;
     });
 
-    // Wrap to intercept `expected` and `message`.
-    if (QUnit.push) {
-      QUnit.push = wrap(QUnit.push, function(push, result, actual, expected, message) {
-        push.apply(this, slice.call(arguments, 1));
-
-        var item = last(QUnit.config.current.assertions);
-        item.expected = QUnit.jsDump.parse(expected);
-        item.text = message;
-      });
-    }
-    if (QUnit.pushResult) {
-      QUnit.pushResult = wrap(QUnit.pushResult, function(pushResult, details) {
-        pushResult.apply(this, slice.call(arguments, 1));
-
-        var item = last(QUnit.config.current.assertions);
-        item.expected = QUnit.jsDump.parse(details.expected);
-        item.text = details.message;
-      });
-    }
-    // Wrap to intercept `message`.
-    if (QUnit.pushFailure) {
-      QUnit.pushFailure = wrap(QUnit.pushFailure, function(pushFailure, message) {
-        pushFailure.apply(this, slice.call(arguments, 1));
-
-        var item = last(QUnit.config.current.assertions);
-        item.expected = '';
-        item.text = message;
-      });
-    }
-    // Wrap to flag tests using `assert.async`.
-    if (QUnit.assert.async) {
-      QUnit.assert.async = wrap(QUnit.assert.async, function(async) {
-        this.test.usedAsync = true;
-        return async.apply(this, slice.call(arguments, 1));
-      });
-    }
     // Add a callback to be triggered at the start of every test.
     QUnit.testStart(function(details) {
       var config = QUnit.config,
@@ -445,7 +385,7 @@
       if (!test.retries) {
         test.retries = 0;
         test.finish = wrap(test.finish, function(finish) {
-          if (this.async || this.usedAsync) {
+          if (this.usedAsync) {
             var asserts = this.assertions,
                 config = QUnit.config,
                 index = -1,
@@ -484,34 +424,23 @@
         return;
       }
       // Wrap to intercept `expected` and `message`.
-      if (test.push) {
-        test.push = wrap(test.push, function(push, result, actual, expected, message) {
-          push.apply(this, slice.call(arguments, 1));
+      test.pushResult = wrap(test.pushResult, function(pushResult, details) {
+        pushResult.apply(this, slice.call(arguments, 1));
 
-          var item = last(this.assertions);
-          item.expected = QUnit.jsDump.parse(expected);
-          item.text = message;
-        });
-      }
-      if (test.pushResult) {
-        test.pushResult = wrap(test.pushResult, function(pushResult, details) {
-          pushResult.apply(this, slice.call(arguments, 1));
+        var item = last(this.assertions);
+        item.expected = QUnit.jsDump.parse(details.expected);
+        item.text = details.message;
+      });
 
-          var item = last(this.assertions);
-          item.expected = QUnit.jsDump.parse(details.expected);
-          item.text = details.message;
-        });
-      }
       // Wrap to intercept `message`.
-      if (test.pushFailure) {
-        test.pushFailure = wrap(test.pushFailure, function(pushFailure, message) {
-          pushFailure.apply(this, slice.call(arguments, 1));
+      test.pushFailure = wrap(test.pushFailure, function(pushFailure, message) {
+        pushFailure.apply(this, slice.call(arguments, 1));
 
-          var item = last(this.assertions);
-          item.expected = '';
-          item.text = message;
-        });
-      }
+        var item = last(this.assertions);
+        item.expected = '';
+        item.text = message;
+      });
+
       // Wrap to excuse specific assertions.
       test.finish = wrap(test.finish, function(finish) {
         var asserts = this.assertions,
@@ -651,12 +580,9 @@
     /*------------------------------------------------------------------------*/
 
     // Replace poisoned `raises` method.
-    if (QUnit['throws']) {
-      QUnit.raises = QUnit['throws'];
-    }
-    if (QUnit.assert) {
-      QUnit.assert.raises = QUnit.assert['throws'];
-    }
+    QUnit.raises = QUnit['throws'];
+    QUnit.assert.raises = QUnit.assert['throws'];
+
     // Add CLI extras.
     if (!document) {
       // Start log throbber.
