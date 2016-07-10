@@ -519,10 +519,6 @@
 
     /*------------------------------------------------------------------------*/
 
-    // Replace poisoned `raises` method.
-    QUnit.raises = QUnit['throws'];
-    QUnit.assert.raises = QUnit.assert['throws'];
-
     // Add CLI extras.
     if (!document) {
       // Start log throbber.
