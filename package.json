@@ -1,6 +1,6 @@
 {
   "name": "qunit-extras",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Extends QUnit with extra features and CLI support.",
   "license": "MIT",
   "main": "qunit-extras.js",
