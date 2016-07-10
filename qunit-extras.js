@@ -315,41 +315,6 @@
           excusedTests = excused[details.module],
           excusedAsserts = excusedTests && excusedTests[details.name];
 
-      // Allow async tests to retry.
-      if (test.retries == null) {
-        test.retries = 0;
-        test.finish = wrap(test.finish, function(finish) {
-          if (this.usedAsync) {
-            var asserts = this.assertions,
-                config = QUnit.config,
-                index = -1,
-                length = asserts.length,
-                logs = config.extrasData.module.logs,
-                queue = config.queue;
-
-            while (++index < length) {
-              var assert = asserts[index];
-              if (!assert.result && this.retries < config.asyncRetries) {
-                var oldLength = queue.length;
-                logs.length -= asserts.length;
-                asserts.length = 0;
-
-                this.resumed = false;
-                this.retries++;
-                this.queue();
-
-                unshift.apply(queue, queue.splice(oldLength, queue.length - oldLength));
-                return;
-              }
-            }
-          }
-          finish.apply(this, slice.call(arguments, 1));
-        });
-      }
-      // Exit early when there is nothing to excuse.
-      if (!excusedAsserts) {
-        return;
-      }
       // Excuse the entire test.
       if (excusedAsserts === true) {
         test.async = false;
@@ -357,12 +322,41 @@
         test.expected = 0;
         return;
       }
-      // Wrap to intercept `expected` and `message`.
-      test.pushResult = wrap(test.pushResult, function(pushResult, details) {
-        pushResult.apply(this, slice.call(arguments, 1));
+      // Exit early if test is already wrapped.
+      if (test.retries != null) {
+        return;
+      }
+      // Wrap to enable async test retries.
+      test.retries = 0;
+      test.finish = wrap(test.finish, function(finish) {
+        var args = slice.call(arguments, 1);
+        if (!this.usedAsync) {
+          finish.apply(this, args);
+          return;
+        }
+        var asserts = this.assertions,
+            config = QUnit.config,
+            index = -1,
+            length = asserts.length,
+            logs = config.extrasData.module.logs,
+            queue = config.queue;
 
-        var assert = last(this.assertions);
-        assert.expected = QUnit.jsDump.parse(details.expected);
+        while (++index < length) {
+          var assert = asserts[index];
+          if (!assert.result && this.retries < config.asyncRetries) {
+            var oldLength = queue.length;
+            logs.length -= asserts.length;
+            asserts.length = 0;
+
+            this.resumed = false;
+            this.retries++;
+            this.queue();
+
+            unshift.apply(queue, queue.splice(oldLength, queue.length - oldLength));
+            return;
+          }
+        }
+        finish.apply(this, args);
       });
 
       // Wrap to excuse specific assertions.
@@ -410,6 +404,14 @@
           }
         }
         finish.apply(this, slice.call(arguments, 1));
+      });
+
+      // Wrap to add `expected`.
+      test.pushResult = wrap(test.pushResult, function(pushResult, details) {
+        pushResult.apply(this, slice.call(arguments, 1));
+
+        var assert = last(this.assertions);
+        assert.expected = QUnit.dump.parse(details.expected);
       });
     });
 
