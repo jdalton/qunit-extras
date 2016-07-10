@@ -325,9 +325,8 @@
     // Add a callback to be triggered at the start of every test.
     QUnit.testStart(function(details) {
       var config = QUnit.config,
-          test = config.current;
-
-      var excused = config.excused || {},
+          test = config.current,
+          excused = config.excused || {},
           excusedTests = excused[details.module],
           excusedAsserts = excusedTests && excusedTests[details.name];
 
