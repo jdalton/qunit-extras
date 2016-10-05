@@ -113,13 +113,8 @@
    * @returns {boolean} Returns `true` if the `value` is found, else `false`.
    */
   function includes(array, value) {
-    var length = array ? array.length : 0;
-    while (length--) {
-      if (array[length] === value) {
-        return true;
-      }
-    }
-    return false;
+    var index = array ? array.indexOf(value) : -1;
+    return index > -1;
   }
 
   /**
