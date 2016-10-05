@@ -5,15 +5,11 @@
  * Available under MIT license <http://mths.be/mit>
  */
 ;(function() {
-
-  /** Used as a safe reference for `undefined` in pre ES5 environments. */
-  var undefined;
-
-  /** Used for built-in method references. */
-  var arrayProto = Array.prototype;
+  'use strict';
 
   /** Built-in value references. */
-  var push = arrayProto.push,
+  var arrayProto = Array.prototype,
+      push = arrayProto.push,
       slice = arrayProto.slice,
       unshift = arrayProto.unshift;
 
@@ -21,7 +17,7 @@
   var hr = '----------------------------------------';
 
   /** Used to display the wait throbber. */
-  var throbberDelay = 500,
+  var wait = 500,
       waitCount = -1;
 
   /** Used to match parts of the assert message. */
@@ -36,22 +32,19 @@
   };
 
   /** Detect free variable `global` from Node.js. */
-  var freeGlobal = checkGlobal(typeof global == 'object' && global);
+  var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
 
   /** Detect free variable `self`. */
-  var freeSelf = checkGlobal(typeof self == 'object' && self);
-
-  /** Detect `this` as the global object. */
-  var thisGlobal = checkGlobal(typeof this == 'object' && this);
+  var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
   /** Used as a reference to the global object. */
-  var root = freeGlobal || freeSelf || thisGlobal || Function('return this')();
+  var root = freeGlobal || freeSelf || Function('return this')();
 
   /** Detect free variable `exports`. */
-  var freeExports = freeGlobal && typeof exports == 'object' && exports;
+  var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
 
   /** Detect free variable `module`. */
-  var freeModule = freeExports && typeof module == 'object' && module;
+  var freeModule = freeExports && typeof module == 'object' && module && !module.nodeType && module;
 
   /** Detect the popular CommonJS extension `module.exports`. */
   var moduleExports = freeModule && freeModule.exports === freeExports;
@@ -79,17 +72,6 @@
   }());
 
   /*--------------------------------------------------------------------------*/
-
-  /**
-   * Checks if `value` is a global object.
-   *
-   * @private
-   * @param {*} value The value to check.
-   * @returns {null|Object} Returns `value` if it's a global object, else `null`.
-   */
-  function checkGlobal(value) {
-    return (value && value.Object === Object) ? value : null;
-  }
 
   /**
    * Adds text color to the terminal output of `string`.
@@ -158,13 +140,13 @@
    * @private
    * @param {string} [text=''] The text to log.
    */
-  var logInline = (function() {
+  var logln = (function() {
     if (!isNode || isWindows) {
       return function() {};
     }
     // Cleanup any inline logs when exited via `ctrl+c`.
     process.on('SIGINT', function() {
-      logInline();
+      logln();
       process.exit();
     });
 
@@ -185,8 +167,8 @@
    *
    * @private
    */
-  function logThrobber() {
-    logInline('Please wait' + repeat('.', (++waitCount % 3) + 1));
+  function pleaseWait() {
+    logln('Please wait' + repeat('.', (++waitCount % 3) + 1));
   }
 
   /**
@@ -434,7 +416,7 @@
           moduleLogs = module.logs;
 
       if (!isSilent) {
-        logInline();
+        logln();
         if (!module.printed) {
           module.printed = true;
           console.log(hr);
@@ -486,7 +468,7 @@
           statusColor = failures ? 'magenta' : 'green';
 
       if (!isSilent) {
-        logInline();
+        logln();
         console.log(hr);
         console.log(color(statusColor, '    PASS: ' + details.passed + '  FAIL: ' + failures + '  TOTAL: ' + details.total));
         console.log(color(statusColor, '    Finished in ' + details.runtime + ' milliseconds.'));
@@ -512,7 +494,7 @@
     if (!document) {
       // Start log throbber.
       if (!isSilent) {
-        setInterval(logThrobber, throbberDelay);
+        setInterval(pleaseWait, wait);
       }
       // Must call `QUnit.start` in the test file if not loaded in a browser.
       QUnit.config.autostart = false;
