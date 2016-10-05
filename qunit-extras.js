@@ -7,14 +7,11 @@
 ;(function() {
   'use strict';
 
-  /** Built-in value references. */
-  var arrayProto = Array.prototype,
-      push = arrayProto.push,
-      slice = arrayProto.slice,
-      unshift = arrayProto.unshift;
-
   /** Used as a horizontal rule in console output. */
   var hr = '----------------------------------------';
+
+  /** `Object#toString` result reference. */
+  var symbolTag = '[object Symbol]';
 
   /** Used to display the wait throbber. */
   var wait = 500,
@@ -48,6 +45,19 @@
 
   /** Detect the popular CommonJS extension `module.exports`. */
   var moduleExports = freeModule && freeModule.exports === freeExports;
+
+  /** Used for built-in method references. */
+  var arrayProto = Array.prototype,
+      objectProto = Object.prototype;
+
+  /** Built-in value references. */
+  var objectToString = objectProto.toString,
+      push = arrayProto.push,
+      slice = arrayProto.slice,
+      unshift = arrayProto.unshift;
+
+  /** Used to convert symbols to primitives and strings. */
+  var symbolToString = root.Symbol ? root.Symbol.prototype.toString : undefined;
 
   /** Detect environment objects. */
   var phantom = root.phantom ,
@@ -118,6 +128,17 @@
   }
 
   /**
+   * Checks if `value` is classified as a `Symbol` primitive or object.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+   */
+  function isSymbol(value) {
+    return typeof value == 'symbol' || objectToString.call(value) == symbolTag;
+  }
+
+  /**
    * Gets the last element of `array`.
    *
    * @private
@@ -127,6 +148,26 @@
   function last(array) {
     var length = array ? array.length : 0;
     return length ? array[length - 1] : undefined;
+  }
+
+  /**
+   * Converts `value` to a string.
+   *
+   * @private
+   * @param {*} value The value to convert.
+   * @returns {string} Returns the converted string.
+   */
+  function toString(value) {
+    if (typeof value == 'string') {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map(toString) + '';
+    }
+    if (isSymbol(value)) {
+      return symbolToString ? symbolToString.call(value) : '';
+    }
+    return (value + '');
   }
 
   /**
@@ -359,7 +400,7 @@
             items.push('Expected at least one assertion, but none were run - call expect(0) to accept zero assertions.');
           }
         } else if (expected != length) {
-          items.push('Expected ' + String(expected) + ' assertions, but ' + length + ' were run');
+          items.push('Expected ' + toString(expected) + ' assertions, but ' + length + ' were run');
         }
         var index = -1;
         length = items.length;
@@ -374,7 +415,7 @@
           if (includes(excusedAsserts, assertMessage) ||
               includes(excusedAsserts, assertDied) ||
               includes(excusedAsserts, assertValue) ||
-              includes(excusedAsserts, String(assertValue).replace(/\s+/g, ''))) {
+              includes(excusedAsserts, toString(assertValue).replace(/\s+/g, ''))) {
             if (isStr) {
               while (asserts.length < expected) {
                 asserts.push({ 'result': true });
@@ -444,8 +485,8 @@
 
         if (!result && type == 'EQ') {
           message.push(color('magenta',
-            'Expected: ' + (entry.negative ? 'NOT ' : '') + String(expected) + ', ' +
-            'Actual: ' + String(entry.actual)
+            'Expected: ' + (entry.negative ? 'NOT ' : '') + toString(expected) + ', ' +
+            'Actual: ' + toString(entry.actual)
           ));
         }
         if (!isSilent) {
