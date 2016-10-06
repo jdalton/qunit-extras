@@ -10,15 +10,15 @@
   /** Used as a horizontal rule in console output. */
   var hr = '----------------------------------------';
 
+  /** Used to match parts of the assert message. */
+  var reDied = /^Died on test #\d+/;
+
   /** `Object#toString` result reference. */
   var symbolTag = '[object Symbol]';
 
   /** Used to display the wait throbber. */
   var wait = 500,
       waitCount = -1;
-
-  /** Used to match parts of the assert message. */
-  var reDied = /^Died on test #\d+/;
 
   /** Used to associate color names with their corresponding codes. */
   var ansiCodes = {
@@ -54,10 +54,8 @@
   var objectToString = objectProto.toString,
       push = arrayProto.push,
       slice = arrayProto.slice,
+      symbolToString = root.Symbol ? root.Symbol.prototype.toString : undefined,
       unshift = arrayProto.unshift;
-
-  /** Used to convert symbols to primitives and strings. */
-  var symbolToString = root.Symbol ? root.Symbol.prototype.toString : undefined;
 
   /** Detect environment objects. */
   var phantom = root.phantom ,
@@ -150,25 +148,6 @@
     return length ? array[length - 1] : undefined;
   }
 
-  /**
-   * Converts `value` to a string.
-   *
-   * @private
-   * @param {*} value The value to convert.
-   * @returns {string} Returns the converted string.
-   */
-  function toString(value) {
-    if (typeof value == 'string') {
-      return value;
-    }
-    if (Array.isArray(value)) {
-      return value.map(toString) + '';
-    }
-    if (isSymbol(value)) {
-      return symbolToString ? symbolToString.call(value) : '';
-    }
-    return (value + '');
-  }
 
   /**
    * Writes an inline message to standard output.
@@ -217,6 +196,26 @@
    */
   function repeat(text, n) {
     return Array(n + 1).join(text);
+  }
+
+  /**
+   * Converts `value` to a string.
+   *
+   * @private
+   * @param {*} value The value to convert.
+   * @returns {string} Returns the converted string.
+   */
+  function toString(value) {
+    if (typeof value == 'string') {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map(toString) + '';
+    }
+    if (isSymbol(value)) {
+      return symbolToString ? symbolToString.call(value) : '';
+    }
+    return (value + '');
   }
 
   /**
