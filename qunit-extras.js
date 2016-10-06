@@ -387,6 +387,7 @@
         var asserts = this.assertions,
             config = QUnit.config,
             expected = this.expected,
+            index = -1,
             items = asserts.slice(),
             length = items.length;
 
@@ -401,9 +402,6 @@
         } else if (expected != length) {
           items.push('Expected ' + toString(expected) + ' assertions, but ' + length + ' were run');
         }
-        var index = -1;
-        length = items.length;
-
         while (++index < length) {
           var assert = items[index],
               isStr = typeof assert == 'string',
