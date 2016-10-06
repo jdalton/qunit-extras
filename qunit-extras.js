@@ -544,4 +544,4 @@
   } else {
     install(root.QUnit);
   }
-}.call(this));
+}());
