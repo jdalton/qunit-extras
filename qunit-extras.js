@@ -427,7 +427,7 @@
         finish.apply(this, slice.call(arguments, 1));
       });
 
-      // Wrap to add `expected`.
+      // Wrap to add `assert.expected`.
       test.pushResult = wrap(test.pushResult, function(pushResult, details) {
         pushResult.apply(this, slice.call(arguments, 1));
         var assert = last(this.assertions);
