@@ -1,4 +1,4 @@
-# QUnit Extras v2.1.0
+# QUnit Extras v3.0.0
 
 Extends QUnit with extra features and CLI support.
 
@@ -32,4 +32,4 @@ QUnit.config.excused = {
 
 ## Support
 
-Tested in Node.js 0.10-6.
+Tested in Node.js 4-6.
