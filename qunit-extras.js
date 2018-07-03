@@ -1,8 +1,8 @@
 /*!
  * qunit-extras
- * Copyright 2011-2016 John-David Dalton <http://allyoucanleet.com/>
- * Based on a gist by Jörn Zaefferer <https://gist.github.com/722381>
- * Available under MIT license <http://mths.be/mit>
+ * Copyright 2011-2016 John-David Dalton
+ * Based on a gist by Jörn Zaefferer
+ * Available under MIT license
  */
 ;(function() {
   'use strict';
